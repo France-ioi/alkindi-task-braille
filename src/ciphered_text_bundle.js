@@ -1,7 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {updateGridGeometry, updateGridVisibleRows, getClassNames} from './utils';
-import {BETWEEN_SYM_VT} from './symbols_bundle';
+import {BETWEEN_SYM_VT, BETWEEN_SYM_HZ} from './symbols_bundle';
 
 
 function appInitReducer (state, _action) {
@@ -22,8 +22,10 @@ function taskInitReducer (state) {
   }
   const {cipherSymbols} = state.taskData;
   const {width, height} = state.symbols;
-  cipheredText = {...cipheredText,  cellWidth: width,
-    cellHeight: height, cells: cipherSymbols, nbCells: cipherSymbols.length};
+  cipheredText = {
+    ...cipheredText, cellWidth: width,
+    cellHeight: height, cells: cipherSymbols, nbCells: cipherSymbols.length
+  };
   cipheredText = updateGridVisibleRows(cipheredText);
   return {...state, cipheredText};
 }
@@ -50,7 +52,7 @@ function cipheredTextResizedReducer (state, {payload: {width}}) {
 
 function cipheredTextScrolledReducer (state, {payload: {scrollTop}}) {
   let {cipheredText} = state;
-  cipheredText = {...cipheredText, scrollTop: Math.max(BETWEEN_SYM_VT/2 - 5, scrollTop)};
+  cipheredText = {...cipheredText, scrollTop: Math.max(BETWEEN_SYM_VT / 2 - 5, scrollTop)};
   cipheredText = updateGridVisibleRows(cipheredText);
   return {...state, cipheredText};
 }
@@ -81,50 +83,65 @@ function CipherTextViewSelector (state) {
 class CipherTextView extends React.PureComponent {
 
   render () {
-    const {width, height, visibleRows, cellWidth, cellHeight, bottom, cells} = this.props;
+    const {width, height, pageColumns, visibleRows, cellWidth, cellHeight, bottom, cells} = this.props;
     return (
       <div>
         <div
-        ref={this.refTextBox}
-        onScroll={this.onScroll}
-        style={{
-          position: 'relative',
-          width: width && `${width}px`,
-          height: height && `${height}px`,
-          overflowY: 'scroll',
-          overflowX: 'scroll',
-          border: '1px solid #000',
+          ref={this.refTextBox}
+          onScroll={this.onScroll}
+          style={{
+            position: 'relative',
+            width: width && `${width}px`,
+            height: height && `${height}px`,
+            overflowX: 'scroll',
+            border: '1px solid #000',
 
-        }} >
-        {(visibleRows || [])
-        .map(({index, columns}) =>
+          }} >
+          {(function () {
+            const lines = [];
+            for (let i = 0; i < pageColumns-1; i++) {
+              lines.push(<span style={{
+                position: 'absolute',
+                left: `${(i+1) * cellWidth}px`,
+                height: `${bottom}px`,
+                borderLeft: '1px solid #333',
+              }}></span>);
+            }
+            return lines;
+          })()}
+
+          {(visibleRows || [])
+            .map(({index, columns}) =>
               (<div
                 key={index}
                 style={{
                   position: 'absolute',
                   top: `${index * cellHeight}px`,
-                  padding: '4px'}}>
-                    {columns.map(({index, cell}) =>
-                      (<svg
-                        key={index}
-                        className={`_${cell[0]}a _${cell[1]}b _${cell[2]}c`}
-                        width={cellWidth}
-                        height={cellHeight}
-                        style={{
-                          position: 'absolute',
-                          left: `${index * cellWidth}px`,
-                          width: `${cellWidth}px`,
-                          height: `${cellHeight}px`}} >
-                        {cells}
-                      </svg>)
-                    )}
+                  padding: '4px'
+                }}>
+                {columns.map(({index, cell}) =>
+                  (<svg
+                    key={index}
+                    className={`_${cell[0]}a _${cell[1]}b _${cell[2]}c`}
+                    width={cellWidth}
+                    height={cellHeight}
+                    style={{
+                      position: 'absolute',
+                      left: `${index * cellWidth + 1}px`,
+                      width: `${cellWidth}px`,
+                      height: `${cellHeight}px`
+                    }} >
+                    {cells}
+                  </svg>)
+                )}
               </div>)
             )}
           <div style={{
             position: 'absolute',
             top: `${bottom}px`,
             width: '1px',
-            height: '1px'}} />
+            height: '1px'
+          }} />
         </div>
       </div>
     );

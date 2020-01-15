@@ -28,7 +28,7 @@ export function createSymbolStructure () {
     }
     cx += BETWEEN_SYM_HZ;
   }
-  return {cells, width: cx - (BETWEEN_SYM_HZ / 2), height: cy - BETWEEN_DOTS + (BETWEEN_SYM_VT / 2)};
+  return {cells, width: cx - BETWEEN_SYM_HZ, height: cy - BETWEEN_DOTS + (BETWEEN_SYM_VT / 2)};
 }
 
 
@@ -77,12 +77,12 @@ export function updateGridGeometry (grid) {
   const {width, cellWidth, cellHeight, scrollTop, nbCells} = grid;
   const scrollBarWidth = 20;
   const pageColumns = Math.max(5, Math.floor((width - scrollBarWidth) / cellWidth));
-  const newWidth = pageColumns  * cellWidth + scrollBarWidth - BETWEEN_SYM_HZ/2;
+  const newWidth = pageColumns  * (cellWidth + 1) + scrollBarWidth;
   const pageRows = 5;
   const height = (pageRows * cellHeight);
   const bottom = Math.ceil(nbCells / pageColumns) * cellHeight - 1;
   const maxTop = Math.max(0, bottom + 1 - pageRows * cellHeight);
-  return {...grid, width:newWidth, height, pageColumns, pageRows, scrollTop: Math.min(maxTop, Math.max(BETWEEN_SYM_VT/2 - 5, scrollTop)), bottom, maxTop};
+  return {...grid, width:newWidth, height, pageColumns, pageRows, scrollTop: Math.min(maxTop - BETWEEN_SYM_VT/2 - 5, Math.max(BETWEEN_SYM_VT/2 - 5, scrollTop)), bottom, maxTop};
 }
 
 export function updateGridVisibleRows (grid, options) {
@@ -99,7 +99,10 @@ export function updateGridVisibleRows (grid, options) {
     const rowStartPos = rowIndex * pageColumns;
     const rowCells = [];
     for (let colIndex = 0; colIndex < pageColumns; colIndex += 1) {
-      rowCells.push({index: colIndex, ...getCell(rowStartPos + colIndex)});
+      const data = getCell(rowStartPos + colIndex);
+      if (data.cell) {
+        rowCells.push({index: colIndex, ...data});
+      }
     }
     rows.push({index: rowIndex, columns: rowCells});
   }
