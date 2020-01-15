@@ -34,19 +34,19 @@ stream.once('open', function () {
         }
 
         ['a', 'b', 'c'].forEach((l, i) => {
-            const sym = `.sy${k}${l}`;
+            const sym = `._${k}${l}`;
             dots.forEach(d => stream.write(`${sym} .d${i}_${d},`));
         });
 
         // if (k === 5) {
         //     break;
         // }
-        if (k > c + 250) {
+        if (k > c + 150) {
             c = k;
             console.log('written upto symbol', k);
             stream.write(`.z{fill: #000;}`);
         }
     }
-    stream.write(` z {fill: #000;}`);
+    stream.write(`.z{fill: #000;}`);
     stream.end();
 });
