@@ -43,10 +43,10 @@ stream.once('open', function () {
         // }
         if (k > c + 150) {
             c = k;
-            console.log('written upto symbol', k);
             stream.write(`.z{fill: #000;}`);
         }
     }
     stream.write(`.z{fill: #000;}`);
     stream.end();
+    console.log('css symbols generated!');
 });

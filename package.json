@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Enigma Alkindi task",
   "scripts": {
+    "postinstall": "node css_symbols_gen.js",
     "build": "NODE_ENV=production webpack --config webpack.prod.js",
     "watch": "webpack --progress --colors --watch",
     "lint": "npx eslint src",
@@ -37,6 +38,7 @@
   "dependencies": {
     "alphanum-increment": "^0.0.2",
     "array.prototype.fill": "^1.0.2",
+    "benchmark": "^2.1.4",
     "bootstrap": "^3.3.7",
     "classnames": "^2.2.5",
     "es5-sham-ie8": "^1.0.1",

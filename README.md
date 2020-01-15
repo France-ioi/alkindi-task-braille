@@ -1,7 +1,7 @@
 # Installation
 
 1. `git submodule update --init` to install bebras-modules
-2. `npm install` to install dependencies
+2. `npm install` to install dependencies (if you already have node_modules, then run `node  css_symbols_gen.js` to generate symbols css file)
 3. `npm run-script build` to build the js packages
 4. Add server modules to bebras-server-modules as described below
 5. Install shuffle and range either globally either to the bebras-server-modules folder by running `npm install shuffle range` in that folder.
