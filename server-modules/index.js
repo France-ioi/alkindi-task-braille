@@ -57,7 +57,7 @@ const colMasks = [
 ];
 
 
-const elements = [
+const _elements = [
   [0, 0],
   [0, 1],
   [0, 2],
@@ -239,7 +239,7 @@ function applyXORMask (clearSymbols) {
 // }
 
 
-function applyPermutation (data, permutation) {
+function applyPermutation (data, elements, permutation) {
 
   return data.map(item => {
     const flipped = [];
@@ -295,8 +295,8 @@ function generateTaskData (task) {
 
   const xorSymbols = applyXORMask(clearSymbols);
 
-  const permutation = generatePermutation(elements, rng0);
-  const cipherSymbols = applyPermutation(xorSymbols, permutation);
+  const permutation = generatePermutation(_elements, rng0);
+  const cipherSymbols = applyPermutation(xorSymbols, _elements, permutation);
 
   //debugging...
   // const permutation = [...elements];
@@ -355,4 +355,45 @@ function generatePermutation (deck, rngKeys) {
   let key = shuffle({random: rngKeys, deck}).cards;
   //key = "DLMEFVAQRSTNUCWXGOPYZBHIJK"; //for dev mode testing
   return key;
+}
+
+module.exports.generateTaskData = function () {
+  // const mix = [2, 9, 3, 4, 5, 6, 7, 8, 1];
+  // const perm = mix.map(v => _elements[v - 1]);
+
+  // const cipherSymbols = applyPermutation([[
+  //   2925, 2457, 3294
+  // ]], _elements, perm);
+
+
+
+  const editedPairs = {
+    '0': {
+      rank: 1
+    },
+    '1': {
+      rank: 8
+    },
+    '8': {
+      rank: 0
+    }
+  };
+
+  const [ele, perm] = Object.keys(editedPairs)
+  .map((k) =>
+    [_elements[parseInt(k)], _elements[editedPairs[k].rank]]
+  ).reduce((ar, dup) => {
+    ar[0].push(dup[0]);
+    ar[1].push(dup[1]);
+    return ar;
+  },[[],[]]);
+
+
+  const cipherSymbols = applyPermutation([[
+    2925, 2457, 3294
+  ]], ele, perm);
+
+  console.log('cipherSymbols :', cipherSymbols);
+
+
 }

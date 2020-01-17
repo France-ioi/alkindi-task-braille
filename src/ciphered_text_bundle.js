@@ -69,17 +69,6 @@ function CipherTextViewSelector (state) {
   };
 }
 
-// class DotGrid extends React.PureComponent {
-//   render () {
-//     const {svgData} = this.props;
-//     return (
-//       <svg className={`sy400a sy1270b sy4095c`} width={svgData.width} height={svgData.height}>
-//         {svgData.cells}
-//       </svg>
-//     );
-//   }
-// }
-
 class CipherTextView extends React.PureComponent {
 
   render () {
@@ -100,11 +89,11 @@ class CipherTextView extends React.PureComponent {
           {(function () {
             const lines = [];
             for (let i = 0; i < pageColumns-1; i++) {
-              lines.push(<span style={{
+              lines.push(<span key={i} style={{
                 position: 'absolute',
                 left: `${(i+1) * cellWidth}px`,
                 height: `${bottom}px`,
-                borderLeft: '1px solid #333',
+                borderLeft: '2px solid #000',
               }}></span>);
             }
             return lines;

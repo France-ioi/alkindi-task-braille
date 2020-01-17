@@ -2,6 +2,57 @@ import React from 'react';
 import update from 'immutability-helper';
 import {RADIUS, BETWEEN_DOTS, BETWEEN_SYM_HZ, BETWEEN_SYM_VT} from './symbols_bundle';
 
+const colMasks = [
+  1 << 2 | 1 << 5 | 1 << 8 | 1 << 11, // 2340
+  1 << 1 | 1 << 4 | 1 << 7 | 1 << 10, // 1170
+  1 << 0 | 1 << 3 | 1 << 6 | 1 << 9  // 585
+];
+
+
+export function applyPermutation (data, elements, permutation) {
+  return data.map(item => {
+    item = [...item];
+    const flipped = [];
+
+    for (let i = 0; i < elements.length; i++) {
+      const el_str = elements[i].toString();
+      const pr_str = permutation[i].toString();
+      if (el_str === pr_str || flipped.includes(pr_str)) {
+        continue;
+      }
+      flipped.push(el_str);
+
+      let from, to;
+      if (elements[i][1] < permutation[i][1]) { // to get the shift >> | << sign correcly
+        from = elements[i], to = permutation[i];
+      } else {
+        to = elements[i], from = permutation[i];
+      }
+
+      const value1 = item[from[0]];
+      const mask1Index = from[1];
+      const colMask1 = colMasks[mask1Index];
+
+      const value2 = item[to[0]];
+      const mask2Index = to[1];
+      const colMask2 = colMasks[mask2Index];
+
+      const shift = Math.abs(mask1Index - mask2Index);
+
+      if (from[0] === to[0]) {
+        item[to[0]] = ((value1 & colMask1) >> shift) + ((value2 & colMask2) << shift) + (value2 & ~(colMask1 | colMask2));
+      } else {
+        item[to[0]] = ((value1 & colMask1) >> shift) + (value2 & ~colMask2);
+        item[from[0]] = ((value2 & colMask2) << shift) + (value1 & ~colMask1);
+      }
+    }
+    return item;
+  });
+}
+
+
+
+
 // create the visual positioning of 9X4 symbols cell.
 export function createSymbolStructure () {
   const cells = [];
@@ -26,9 +77,10 @@ export function createSymbolStructure () {
       }
       cx += BETWEEN_DOTS;
     }
+    cx -= BETWEEN_DOTS;
     cx += BETWEEN_SYM_HZ;
   }
-  return {cells, width: cx - BETWEEN_SYM_HZ, height: cy - BETWEEN_DOTS + (BETWEEN_SYM_VT / 2)};
+  return {cells, width: cx - BETWEEN_SYM_HZ + BETWEEN_SYM_HZ / 2, height: cy - BETWEEN_DOTS + (BETWEEN_SYM_VT / 2)};
 }
 
 
@@ -77,12 +129,12 @@ export function updateGridGeometry (grid) {
   const {width, cellWidth, cellHeight, scrollTop, nbCells} = grid;
   const scrollBarWidth = 20;
   const pageColumns = Math.max(5, Math.floor((width - scrollBarWidth) / cellWidth));
-  const newWidth = pageColumns  * (cellWidth + 1) + scrollBarWidth;
+  const newWidth = pageColumns * (cellWidth + 1) + scrollBarWidth;
   const pageRows = 5;
   const height = (pageRows * cellHeight);
   const bottom = Math.ceil(nbCells / pageColumns) * cellHeight - 1;
   const maxTop = Math.max(0, bottom + 1 - pageRows * cellHeight);
-  return {...grid, width:newWidth, height, pageColumns, pageRows, scrollTop: Math.min(maxTop - BETWEEN_SYM_VT/2 - 5, Math.max(BETWEEN_SYM_VT/2 - 5, scrollTop)), bottom, maxTop};
+  return {...grid, width: newWidth, height, pageColumns, pageRows, scrollTop: Math.min(maxTop - BETWEEN_SYM_VT / 2 - 5, Math.max(BETWEEN_SYM_VT / 2 - 5, scrollTop)), bottom, maxTop};
 }
 
 export function updateGridVisibleRows (grid, options) {

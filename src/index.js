@@ -9,6 +9,7 @@ import './symbols.css';
 
 import SymbolsBundle from './symbols_bundle';
 import CipheredTextBundle from './ciphered_text_bundle';
+import PermutatedTextBundle from './permutated_text_bundle';
 import FrequencyAnalysisBundle from './frequency_analysis_bundle';
 import SubstitutionsBundle from './substitutions_bundle';
 import DecipheredTextBundle from './deciphered_text_bundle';
@@ -27,6 +28,7 @@ const TaskBundle = {
   includes: [
     SymbolsBundle,
     CipheredTextBundle,
+    PermutatedTextBundle,
     // FrequencyAnalysisBundle,
     // SubstitutionsBundle,
     // DecipheredTextBundle,
@@ -77,29 +79,26 @@ function taskRefreshReducer (state, _action) {
   return {...state,/*substitutions*/};
 }
 
-function getTaskAnswer (_state) {
-  // const {taskData: {alphabet}} = state;
-  // return {
-  //   substitutions: state.substitutions.map(substitution => substitution.cells.map(({editable}) => alphabet.indexOf(editable)))
-  // };
+function getTaskAnswer (state) {
+  const {permutationText} = state;
+  return {
+    permutation: permutationText.dump
+  };
+}
+
+function taskAnswerLoaded (state, {payload: {answer}}) {
+  const {permutation} = answer;
+  return update(state, {
+    permutationText: {dump: {$set: permutation}}
+  });
+}
+
+function getTaskState (_state) {
   return {};
 }
 
-function taskAnswerLoaded (state, {payload: {_answer}}) {
-  // const {alphabet, hints} = selectTaskData(state);
-  // const substitutions = loadSubstitutions(alphabet, hints, answer.substitutions);
-  return update(state, {substitutions: {$set: {}}});
-}
-
-function getTaskState (state) {
-  const {taskData: {alphabet}} = state;
-  return {substitutions: dumpSubstitutions(alphabet, state.substitutions)};
-}
-
 function taskStateLoaded (state, {payload: {_dump}}) {
-  // const {alphabet, hints} = selectTaskData(state);
-  // const substitutions = loadSubstitutions(alphabet, hints, dump.substitutions);
-  return update(state, {substitutions: {$set: {}}});
+  return state;
 }
 
 export function run (container, options) {
