@@ -1,7 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {updateGridGeometry, updateGridVisibleRows, applyAND} from './utils';
-import {BETWEEN_DOTS, BETWEEN_SYM_VT, BETWEEN_SYM_HZ} from './symbols_bundle';
+import {BETWEEN_DOTS, BETWEEN_SYM_VT, BETWEEN_SYM_HZ, RADIUS} from './symbols_bundle';
 
 const elements = [
   [0, 0],
@@ -165,13 +164,13 @@ class TriangleButtonGroup extends React.PureComponent {
   render () {
     const {onClick} = this.props;
     const triangles = [];
-    let margin = Math.ceil(BETWEEN_SYM_HZ / 2) - 1;
+    let margin = 0;
     for (let i = 0; i < 9; i++) {
       triangles.push(<div key={i} onClick={onClick.bind(null, elements[i])} style={{marginLeft: margin}} className="triangle"></div>);
       margin = (i === 2 || i === 5) ? Math.ceil(BETWEEN_SYM_HZ * 2) + 1 : BETWEEN_DOTS;
     }
     return (
-      <div style={{marginTop: 86}}>
+      <div style={{marginTop: 98}}>
         {triangles}
       </div>
     );
@@ -182,7 +181,9 @@ class SymbolsCircleAsBits extends React.PureComponent {
   render () {
     const {cells, onBitClick} = this.props;
     return cells.map(ele => React.cloneElement(ele, {
-      onClick: onBitClick.bind(null, ele.key.substr(1).split('_').map((v, i) => i === 1 ? 11 - parseInt(v) : parseInt(v)))
+      onClick: onBitClick.bind(null, ele.key.substr(1).split('_').map((v, i) => i === 1 ? 11 - parseInt(v) : parseInt(v))),
+      cy: ele.props.cy - BETWEEN_SYM_VT/2 + RADIUS + 1,
+      cx: ele.props.cx - BETWEEN_SYM_HZ/2 + RADIUS + 1,
     }));
   }
 }
@@ -190,17 +191,15 @@ class SymbolsCircleAsBits extends React.PureComponent {
 class ANDTool extends React.PureComponent {
 
   render () {
-    const {andMask, cells, onBitClick, onTriangleClick, cellWidth, cellHeight} = this.props;
+    const {andMask, cells, onBitClick, onTriangleClick} = this.props;
     return (
       <div className="xor_wrapper">
         <div className="xor_tool">
           <svg className={`_${andMask[0]}a _${andMask[1]}b _${andMask[2]}c`}
-            transform="scale(3) translate(44, 10)"
-            preserveAspectRatio="xMidYMid slice"
-            viewBox={`0 0 ${cellWidth} ${cellHeight}`}
+            transform="scale(3) translate(42.6, 16)"
             style={{
-              width: 144,
-              height: 51
+              width: (BETWEEN_DOTS*6) + (BETWEEN_SYM_HZ*2) + (RADIUS+1)*2,
+              height: (BETWEEN_DOTS*3) + (RADIUS+1)*2,
             }}
           >
             <SymbolsCircleAsBits
@@ -225,8 +224,6 @@ class ANDView extends React.PureComponent {
         <ANDTool
           cells={cells}
           andMask={andMask}
-          cellWidth={cellWidth}
-          cellHeight={cellHeight}
           onBitClick={this.onBitClick}
           onTriangleClick={this.onTriangleClick}
         />
