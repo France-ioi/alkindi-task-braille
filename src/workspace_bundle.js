@@ -4,18 +4,18 @@ import {connect} from 'react-redux';
 
 function WorkspaceSelector (state) {
   const {
-    views: {CipheredText, PermutatedText, XORText, FrequencyAnalysis, Substitution, DecipheredText, HintRequestFeedback, Hints},
+    views: {CipheredText, PermutatedText, XORText, ANDText, FrequencyAnalysis, Substitution, DecipheredText, HintRequestFeedback, Hints},
   } = state;
 
   return {
-    CipheredText, PermutatedText, XORText, FrequencyAnalysis, Substitution, DecipheredText, HintRequestFeedback, Hints,
+    CipheredText, PermutatedText, XORText, ANDText, FrequencyAnalysis, Substitution, DecipheredText, HintRequestFeedback, Hints,
   };
 }
 
 class Workspace extends React.PureComponent {
   render () {
     const {
-      CipheredText, PermutatedText, XORText, FrequencyAnalysis, Substitution, DecipheredText, HintRequestFeedback, Hints,
+      CipheredText, PermutatedText, XORText, ANDText, FrequencyAnalysis, Substitution, DecipheredText, HintRequestFeedback, Hints,
     } = this.props;
     return (
       <div>
@@ -27,6 +27,9 @@ class Workspace extends React.PureComponent {
         <br />
         <h2>{"XOR Mask:"}</h2>
         <XORText />
+        <br />
+        <h2>{"AND Mask:"}</h2>
+        <ANDText />
         <br />
         <h2>{"Analyse de fréquence"}</h2>
         {/* <FrequencyAnalysis /> */}

@@ -11,6 +11,7 @@ import SymbolsBundle from './symbols_bundle';
 import CipheredTextBundle from './ciphered_text_bundle';
 import PermutatedTextBundle from './permutated_text_bundle';
 import XORTextBundle from './xor_text_bundle';
+import ANDTextBundle from './and_text_bundle';
 import FrequencyAnalysisBundle from './frequency_analysis_bundle';
 import SubstitutionsBundle from './substitutions_bundle';
 import DecipheredTextBundle from './deciphered_text_bundle';
@@ -31,6 +32,7 @@ const TaskBundle = {
     CipheredTextBundle,
     PermutatedTextBundle,
     XORTextBundle,
+    ANDTextBundle,
     // FrequencyAnalysisBundle,
     // SubstitutionsBundle,
     // DecipheredTextBundle,
@@ -82,18 +84,20 @@ function taskRefreshReducer (state, _action) {
 }
 
 function getTaskAnswer (state) {
-  const {permutationText, xorText} = state;
+  const {permutationText, xorText, andText} = state;
   return {
     permutation: permutationText.dump,
     xor: xorText.dump,
+    and: andText.dump
   };
 }
 
 function taskAnswerLoaded (state, {payload: {answer}}) {
-  const {permutation, xor} = answer;
+  const {permutation, xor, and} = answer;
   return update(state, {
     permutationText: {dump: {$set: permutation}},
     xorText: {dump: {$set: xor}},
+    andText: {dump: {$set: and}}
   });
 }
 

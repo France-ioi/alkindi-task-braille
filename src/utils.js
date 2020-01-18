@@ -73,6 +73,30 @@ export function applyXOR (data, xorMask) {
 }
 
 
+export function applyAND (newData, andMask, oldData) {
+  const [one, two, three] = andMask;
+  if (one === 0 && two === 0 && three === 0) {
+    const out = [];
+    for (let i = 0; i < newData.length; i++) {
+      out.push([0, 0, 0]);
+    }
+    return out;
+  }
+
+  const out = [];
+  for (let i = 0; i < newData.length; i++) {
+    const item = [];
+    for (let pos = 0; pos < andMask.length; pos++) {
+      if (andMask[pos]) {
+        item.push(newData[i][pos] & andMask[pos]);
+      } else {
+        item.push(oldData ? oldData[i][pos] : 0);
+      }
+    }
+    out.push(item);
+  }
+  return out;
+}
 
 
 // create the visual positioning of 9X4 symbols cell.
