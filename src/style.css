@@ -1,8 +1,35 @@
-.perm_wrapper {
+.perm_wrapper,
+.xor_wrapper {
   position: relative;
-  margin-left: 60px;
-  margin-top: 40px;
-  margin-bottom: 60px;
+  margin-left: 50px;
+  margin-top: 50px;
+  margin-bottom: 80px;
+}
+
+.xor_wrapper .xor_note {
+  display: inline-block;
+  width: 235px;
+  margin-left: 50px;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+.xor_wrapper .xor_tool {
+  position: relative;
+  width: 400px;
+  height: 180px;
+  float: left;
+}
+
+.triangle {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 20px solid #2f2f2f;
 }
 
 .perm_line h4 {
@@ -14,7 +41,8 @@
   display: inline;
 }
 
-.perm_line .dd_cell:nth-child(3), .perm_line .dd_cell:nth-child(6) {
+.perm_line .dd_cell:nth-child(3),
+.perm_line .dd_cell:nth-child(6) {
   margin-right: 50px;
 }
 
@@ -57,8 +85,6 @@
 .dd_cell-draggable {
   cursor: move;
 }
-
-
 
 svg {
   fill: #ccc;

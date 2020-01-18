@@ -50,6 +50,28 @@ export function applyPermutation (data, elements, permutation) {
   });
 }
 
+export function applyXOR (data, xorMask) {
+  const posNum = [];
+  for (let i = 0; i < xorMask.length; i++) {
+    if (xorMask[i] !== null) {
+      posNum.push(i);
+    }
+  }
+
+  const out = [];
+
+  for (let i = 0; i < data.length; i++) {
+    const item = [...data[i]];
+    for (let i = 0; i < posNum.length; i++) {
+      const pos = posNum[i];
+      item[pos] ^= xorMask[pos];
+    }
+    out.push(item);
+  }
+
+  return out;
+}
+
 
 
 
