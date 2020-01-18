@@ -129,6 +129,34 @@ export function createSymbolStructure () {
   return {cells, width: cx - BETWEEN_SYM_HZ + BETWEEN_SYM_HZ / 2, height: cy - BETWEEN_DOTS + (BETWEEN_SYM_VT / 2)};
 }
 
+export function createSingleSymbol () {
+  const cells = [];
+  let cx = RADIUS + 1;
+  const y = RADIUS + 1;
+  let cy = y;
+    for (let xi = 0; xi < 3; xi++) {
+      cy = y;
+      for (let yi = 0; yi < 4; yi++) {
+        const key = `d${0}_${(yi * 3) + xi}`;
+        cells.push(
+          <circle
+            key={key}
+            className={`${key}`}
+            cx={cx}
+            cy={cy}
+            r={RADIUS}
+            fill='inherit'
+          />);
+        cy += BETWEEN_DOTS;
+      }
+      cx += BETWEEN_DOTS;
+    }
+    cy -= BETWEEN_DOTS;
+    cx -= BETWEEN_DOTS;
+
+    return {cells, width: cx + RADIUS + 1, height: cy + RADIUS + 1};
+}
+
 
 function range (til) {
   var x = 0, xs = [];

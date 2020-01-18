@@ -33,7 +33,7 @@ const TaskBundle = {
     PermutatedTextBundle,
     XORTextBundle,
     ANDTextBundle,
-    // FrequencyAnalysisBundle,
+    FrequencyAnalysisBundle,
     // SubstitutionsBundle,
     // DecipheredTextBundle,
     // HintsBundle,

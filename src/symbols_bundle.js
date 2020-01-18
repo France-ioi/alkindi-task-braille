@@ -1,6 +1,6 @@
 // import React from 'react';
 // import {connect} from 'react-redux';
-import {createSymbolStructure} from './utils';
+import {createSymbolStructure, createSingleSymbol} from './utils';
 
 export const RADIUS = 3;
 export const BETWEEN_DOTS = 2 * (2 * RADIUS);
@@ -16,6 +16,7 @@ function appInitReducer (state, _action) {
       cells,
       width,
       height,
+      singleSymbol: createSingleSymbol()
     }
   };
 }

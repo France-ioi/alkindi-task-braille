@@ -31,8 +31,9 @@ class Workspace extends React.PureComponent {
         <h2>{"AND Mask:"}</h2>
         <ANDText />
         <br />
-        <h2>{"Analyse de fréquence"}</h2>
-        {/* <FrequencyAnalysis /> */}
+        <h2>{"Frequency Analysis"}</h2>
+        <FrequencyAnalysis />
+        <br />
         <h2>Substitution:</h2>
         <div className="clearfix">
           <div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import {updateGridGeometry, updateGridVisibleRows, applyAND} from './utils';
 import {BETWEEN_DOTS, BETWEEN_SYM_VT, BETWEEN_SYM_HZ, RADIUS} from './symbols_bundle';
 
 const elements = [
