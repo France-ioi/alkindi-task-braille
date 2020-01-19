@@ -76,7 +76,7 @@ function HintSelector (state) {
     if (typeof editingDecipher.symbol === 'number') {
         const editingCell = cells[editingDecipher.symbol];
         if (!editingCell.hint && !editingCell.locked) {
-            hintRequestData = {...editingDecipher};
+            hintRequestData = {cellRank: editingDecipher.symbol};
         }
     }
     const isAllHint = (hints.length > 0 && (hints.map(({type}) => (type == 'type_2')).filter(bool => bool)).length !== 0) || false;

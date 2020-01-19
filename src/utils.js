@@ -415,9 +415,6 @@ export function applySubstitution (substitution, result) {
   let rank = result.rank, cell;
   cell = substitution.cells[rank];
   rank = substitution.backward[rank];
-  if (rank !== -1) {
-    console.log('object :', rank, cell);
-  }
   result.rank = rank;
   if (cell) {
     result.trace.push(cell);

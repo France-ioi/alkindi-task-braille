@@ -107,11 +107,11 @@ module.exports.gradeAnswer = function (args, task_data, callback) {
   const {substitutions} = JSON.parse(args.answer.value);
 
   const correctLetters = [];
-  for (let i=0; i< substitutions.length; i++) {
+  for (let i = 0; i < substitutions.length; i++) {
     const [numValue, alphabetIndex] = substitutions[i];
-     if (symbolAlphabet[alphabetIndex] === numValue) {
-       correctLetters.push(alphabet[alphabetIndex]);
-     }
+    if (symbolAlphabet[alphabetIndex] === numValue) {
+      correctLetters.push(alphabet[alphabetIndex]);
+    }
   }
 
   const evalLength = 200; /* Score on first 200 characters only */
@@ -379,19 +379,21 @@ function getHintsRequested (hints_requested) {
     : []
   )
     .filter(hr => hr !== null)
-    .map(hint => (typeof hint === "string") ?  JSON.parse(hint) : hint);
+    .map(hint => (typeof hint === "string") ? JSON.parse(hint) : hint);
 }
 
 
 function grantHints (hintRequests) {
   return hintRequests.map(function (hintRequest) {
     let symbol;
-    let {messageIndex, cellRank, symbol: rank, type} = hintRequest;
+    let {cellRank, type} = hintRequest;
+    console.log('hintRequest :', hintRequest);
+
     if (type === "type_1") {
-      symbol = symbolAlphabet.includes(cellRank) ? symbolAlphabet[cellRank] : " ";
+      symbol = symbolAlphabet.includes(cellRank) ? alphabet[symbolAlphabet.indexOf(cellRank)] : " ";
     } else if (type === "type_2") {
-      return {messageIndex, cellRank, symbol: '', key: symbolAlphabet, type};
+      return {cellRank, symbol: '', key: symbolAlphabet, type};
     }
-    return {messageIndex, cellRank: rank, symbol, type};
+    return {cellRank, symbol, type};
   });
 }
