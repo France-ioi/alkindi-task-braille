@@ -107,8 +107,8 @@ module.exports.gradeAnswer = function (args, task_data, callback) {
   const {substitutions} = JSON.parse(args.answer.value);
 
   const correctLetters = [];
-  for (let i=0; i< substitutions[0].length; i++) {
-    const [numValue, alphabetIndex] = substitutions[0][i];
+  for (let i=0; i< substitutions.length; i++) {
+    const [numValue, alphabetIndex] = substitutions[i];
      if (symbolAlphabet[alphabetIndex] === numValue) {
        correctLetters.push(alphabet[alphabetIndex]);
      }
@@ -346,6 +346,7 @@ function generateTaskData (task) {
     permutation,
     clearText
   };
+  console.log('permutation :', permutation);
 
   return {publicData, privateData};
 }
@@ -385,12 +386,12 @@ function getHintsRequested (hints_requested) {
 function grantHints (hintRequests) {
   return hintRequests.map(function (hintRequest) {
     let symbol;
-    let {messageIndex, cellRank, type} = hintRequest;
+    let {messageIndex, cellRank, symbol: rank, type} = hintRequest;
     if (type === "type_1") {
-      symbol = symbolAlphabet.includes(cellRank) ? symbolAlphabet[cellRank] : null;
+      symbol = symbolAlphabet.includes(cellRank) ? symbolAlphabet[cellRank] : " ";
     } else if (type === "type_2") {
       return {messageIndex, cellRank, symbol: '', key: symbolAlphabet, type};
     }
-    return {messageIndex, cellRank, symbol, type};
+    return {messageIndex, cellRank: rank, symbol, type};
   });
 }

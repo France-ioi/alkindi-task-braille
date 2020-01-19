@@ -217,9 +217,38 @@ export function updateGridVisibleRows (grid, options) {
     const rowCells = [];
     for (let colIndex = 0; colIndex < pageColumns; colIndex += 1) {
       const data = getCell(rowStartPos + colIndex);
-      if (data.cell) {
-        rowCells.push({index: colIndex, ...data});
-      }
+      rowCells.push({index: colIndex, ...data});
+    }
+    rows.push({index: rowIndex, columns: rowCells});
+  }
+  return {...grid, visible: {rows}};
+}
+
+export function updateGridGeometry2 (grid) {
+  const {width, height, cellWidth, cellHeight, scrollTop, nbCells} = grid;
+  const scrollBarWidth = 20;
+  const pageColumns = Math.max(30, Math.floor((width - scrollBarWidth) / cellWidth));
+  const pageRows = Math.max(5, Math.ceil(height / cellHeight));
+  const bottom = Math.ceil(nbCells / pageColumns) * cellHeight - 1;
+  const maxTop = Math.max(0, bottom + 1 - pageRows * cellHeight);
+  return {...grid, pageColumns, pageRows, scrollTop: Math.min(maxTop, scrollTop), bottom, maxTop};
+}
+
+export function updateGridVisibleRows2 (grid, options) {
+  options = options || {};
+  const {nbCells, cellHeight, pageColumns, pageRows, cells, scrollTop} = grid;
+  if (typeof scrollTop !== 'number') {
+    return grid;
+  }
+  const firstRow = Math.floor(scrollTop / cellHeight);
+  const lastRow = Math.min(firstRow + pageRows - 1, Math.ceil(nbCells / pageColumns) - 1);
+  const rows = [];
+  const getCell = options.getCell || (cells ? (index => ({cell: cells[index]})) : (_index => null));
+  for (let rowIndex = firstRow; rowIndex <= lastRow; rowIndex += 1) {
+    const rowStartPos = rowIndex * pageColumns;
+    const rowCells = [];
+    for (let colIndex = 0; colIndex < pageColumns; colIndex += 1) {
+      rowCells.push({index: colIndex, ...getCell(rowStartPos + colIndex)});
     }
     rows.push({index: rowIndex, columns: rowCells});
   }
@@ -279,51 +308,51 @@ export function makeSubstitution (alphabet) {
 
 export function dumpSubstitutions (alphabet, substitution) {
   return substitution.cells.reduce((arr, {editable, locked}, index) => {
-      const rank = alphabet.indexOf(editable);
-      if (rank !== -1) {
-        arr.push([index, [rank, locked ? 1 : 0]]);
-      }
-      return arr;
-    }, []);
+    const rank = alphabet.indexOf(editable);
+    if (rank !== -1) {
+      arr.push([index, [rank, locked ? 1 : 0]]);
+    }
+    return arr;
+  }, []);
 }
 
 export function loadSubstitutions (alphabet, hints, substitutionDump) {
   const allHints = hints.filter(hint => hint.type === 'type_2');
-    const cells = new Array(size).fill(-1);
-    for (let i = 0; i < substitutionDump.length; i++) {
-      const [index, cell] = substitutionDump[i];
-      cells[index] = cell;
+  const cells = new Array(size).fill(-1);
+  for (let i = 0; i < substitutionDump.length; i++) {
+    const [index, cell] = substitutionDump[i];
+    cells[index] = cell;
+  }
+  const $cells = [];
+  cells.forEach((cell, cellIndex) => {
+    /* Locking information is not included in the answer. */
+    if (typeof cell === 'number') cell = [cell, 0];
+    const [rank, locked] = cell;
+    $cells[cellIndex] = {
+      editable: {$set: rank === -1 ? null : alphabet[rank]},
+      locked: {$set: locked !== 0},
+    };
+  });
+  hints.forEach(({cellRank: j, symbol, type}) => {
+    if (type !== 'type_2') {
+      $cells[j] = {
+        editable: {$set: symbol},
+        hint: {$set: true},
+      };
     }
-    const $cells = [];
-    cells.forEach((cell, cellIndex) => {
-      /* Locking information is not included in the answer. */
-      if (typeof cell === 'number') cell = [cell, 0];
-      const [rank, locked] = cell;
-      $cells[cellIndex] = {
-        editable: {$set: rank === -1 ? null : alphabet[rank]},
-        locked: {$set: locked !== 0},
+  });
+  allHints.forEach(({key}) => {
+    key.forEach((j, rank) => {
+      $cells[j] = {
+        editable: {$set: alphabet[rank]},
+        hint: {$set: true},
       };
     });
-    hints.forEach(({cellRank: j, symbol, type}) => {
-      if (type !== 'type_2') {
-        $cells[j] = {
-          editable: {$set: symbol},
-          hint: {$set: true},
-        };
-      }
-    });
-    allHints.forEach(({key}) => {
-      key.forEach((j, rank) => {
-        $cells[j] = {
-          editable: {$set: alphabet[rank]},
-          hint: {$set: true},
-        };
-      });
-    });
-    let substitution = makeSubstitution(alphabet);
-    substitution = update(substitution, {cells: $cells});
-    substitution = markSubstitutionConflicts(updatePerms(substitution));
-    return substitution;
+  });
+  let substitution = makeSubstitution(alphabet);
+  substitution = update(substitution, {cells: $cells});
+  substitution = markSubstitutionConflicts(updatePerms(substitution));
+  return substitution;
 }
 
 export function editSubstitutionCell (substitution, rank, symbol) {
@@ -386,6 +415,9 @@ export function applySubstitution (substitution, result) {
   let rank = result.rank, cell;
   cell = substitution.cells[rank];
   rank = substitution.backward[rank];
+  if (rank !== -1) {
+    console.log('object :', rank, cell);
+  }
   result.rank = rank;
   if (cell) {
     result.trace.push(cell);
@@ -395,8 +427,8 @@ export function applySubstitution (substitution, result) {
     if (cell.hint) {
       result.isHint = true;
     }
-    if (cell.collision) {
-      result.collision = true;
+    if (cell.isConflict) {
+      result.isConflict = true;
     }
   }
 }

@@ -39,6 +39,14 @@ function appInitReducer (state, _action) {
   return {...state, frequencyAnalysis: {andTextCells: null, substitutionCells: null, visibleLetters}};
 }
 
+function taskInitReducer (state) {
+  return frequencyAnalysisLateReducer(state);
+}
+
+function taskRefreshReducer (state) {
+  return frequencyAnalysisLateReducer(state);
+}
+
 
 function frequencyAnalysisLateReducer (state) {
 
@@ -215,6 +223,8 @@ class ReferenceFrequencyBox extends React.PureComponent {
 export default {
   actionReducers: {
     appInit: appInitReducer,
+    taskInit: taskInitReducer,
+    taskRefresh: taskRefreshReducer,
   },
   lateReducer: frequencyAnalysisLateReducer,
   views: {

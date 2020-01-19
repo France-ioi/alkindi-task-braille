@@ -92,18 +92,19 @@ function SubstitutionSelector (state) {
     substitutions, editing,
     symbols: {singleSymbol},
     taskData: {alphabet},
+    editingDecipher,
   } = state;
   const {cells, selectedAlphabet} = substitutions;
   return {
     substitutionCellEditStarted, substitutionCellEditCancelled, substitutionCellEditMoved,
     substitutionCellLockChanged, substitutionCellCharChanged,
-    cells, nbCells: alphabet.length, selectedAlphabet, singleSymbol, editingRank: editing.cellRank
+    editingDecipher, cells, nbCells: alphabet.length, selectedAlphabet, singleSymbol, editingRank: editing.cellRank
   };
 }
 
 class SubstitutionView extends React.PureComponent {
   render () {
-    const {cells, editingRank, nbCells, selectedAlphabet, singleSymbol} = this.props;
+    const {cells, editingDecipher, editingRank, nbCells, selectedAlphabet, singleSymbol} = this.props;
     return (
       <div style={{width: "100%"}}>
         <div className='clearfix' style={{marginLeft: "130px"}}>
@@ -113,6 +114,7 @@ class SubstitutionView extends React.PureComponent {
             const isActive = false;
             const isEditing = editingRank === index && !locked && !hint;
             const isLast = nbCells === index + 1;
+            const highlighted = editingDecipher.symbol && editingDecipher.symbol === rotating;
             // const shiftedIndex = (rank) % nbCells;
             // const {rotating} = cells[selectedAlphabet[shiftedIndex].symbol];
 
@@ -120,7 +122,7 @@ class SubstitutionView extends React.PureComponent {
               <SubstitutionCell key={rank} rank={rank} isLast={isLast}
                 staticChar={rotating} editRank={index} singleSymbol={singleSymbol}
                 editableChar={editable} isLocked={locked} isHint={hint}
-                isEditing={isEditing} isActive={isActive}
+                isEditing={isEditing} isActive={isActive} highlighted={highlighted}
                 onChangeChar={this.onChangeChar} onChangeLocked={this.onChangeLocked}
                 onEditingStarted={this.onEditingStarted}
                 onEditingCancelled={this.onEditingCancelled}
@@ -152,7 +154,7 @@ class SubstitutionCell extends React.PureComponent {
   /* XXX Clicking in the editable div and entering the same letter does not
          trigger a change event.  This behavior is unfortunate. */
   render () {
-    const {staticChar, singleSymbol, editableChar, isLocked, isHint, isActive, isEditing, isLast, isConflict} = this.props;
+    let {staticChar, highlighted, singleSymbol, editableChar, isLocked, isHint, isActive, isEditing, isLast, isConflict} = this.props;
     const columnStyle = {
       float: 'left',
       width: '20px',
@@ -163,6 +165,10 @@ class SubstitutionCell extends React.PureComponent {
       textAlign: 'center',
       height: '28px'
     };
+    if (highlighted) {
+      staticCellStyle.backgroundColor = "#9c9c9c";
+    }
+
     const editableCellStyle = {
       border: '1px solid black',
       borderRightWidth: isLast ? '1px' : '0',
@@ -170,6 +176,12 @@ class SubstitutionCell extends React.PureComponent {
       cursor: 'text',
       backgroundColor: isHint ? '#afa' : (isConflict ? '#fcc' : '#fff')
     };
+
+    if (isHint && editableChar === ' ') {
+      editableCellStyle.backgroundColor = '#fcc';
+      editableChar = '✖';
+    }
+
     /* Apply active-status separation border style. */
     const bottomCellStyle = staticCellStyle;
     if (isActive) {
@@ -185,7 +197,7 @@ class SubstitutionCell extends React.PureComponent {
           className={`_${staticChar}a`}
           width={singleSymbol.width}
           height={singleSymbol.height}
-          transform={`scale(0.5) translate(-${singleSymbol.width / 2}, -${singleSymbol.height / 2})`}
+          transform={`scale(0.5) translate(-14, -18)`}
         >
           {singleSymbol.cells}
         </svg>) || '\u00A0'}

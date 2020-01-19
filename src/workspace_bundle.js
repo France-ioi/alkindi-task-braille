@@ -48,15 +48,16 @@ class Workspace extends React.PureComponent {
         <h2>Substitution:</h2>
         <div className="clearfix">
           <div>
-            <Substitution index={0} />
+            <Substitution />
           </div>
         </div>
         <br />
         <h2>Hints:</h2>
         <Hints />
         <HintRequestFeedback />
-        <h2>{"Texte déchiffré"}</h2>
-        {/* <DecipheredText /> */}
+        <br />
+        <h2>{"Decrypted text"}</h2>
+        <DecipheredText />
       </div>
     );
   }

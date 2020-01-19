@@ -25,9 +25,11 @@ class Hint1View extends React.PureComponent {
         );
     }
     requestHint = () => {
-        const {dispatch, requestHint, hintRequestData} = this.props;
+        const {dispatch, requestHint, decipheredCellEditCancelled, hintRequestData} = this.props;
         hintRequestData.type = "type_1";
         dispatch({type: requestHint, payload: {request: hintRequestData}});
+        dispatch({type: decipheredCellEditCancelled});
+
     };
 }
 
@@ -66,21 +68,22 @@ class Hint2View extends React.PureComponent {
 function HintSelector (state) {
     const {hints} = state.taskData;
     const {
-        actions: {requestHint, hintRequestFeedbackCleared},
-        hintRequest, substitutions, editing
+        actions: {requestHint, hintRequestFeedbackCleared, decipheredCellEditCancelled},
+        hintRequest, substitutions, editingDecipher,
     } = state;
     let hintRequestData = null;
     const {cells} = substitutions;
-    if (typeof editing.cellRank === 'number') {
-        const editingCell = cells[editing.cellRank];
+    if (typeof editingDecipher.symbol === 'number') {
+        const editingCell = cells[editingDecipher.symbol];
         if (!editingCell.hint && !editingCell.locked) {
-            hintRequestData = {...editing};
+            hintRequestData = {...editingDecipher};
         }
     }
     const isAllHint = (hints.length > 0 && (hints.map(({type}) => (type == 'type_2')).filter(bool => bool)).length !== 0) || false;
 
     return {
         requestHint, hintRequestFeedbackCleared,
+        decipheredCellEditCancelled,
         isAllHint, hintRequest, hintRequestData
     };
 }

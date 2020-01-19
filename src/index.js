@@ -35,7 +35,7 @@ const TaskBundle = {
     ANDTextBundle,
     FrequencyAnalysisBundle,
     SubstitutionsBundle,
-    // DecipheredTextBundle,
+    DecipheredTextBundle,
     HintsBundle,
     WorkspaceBundle,
   ],

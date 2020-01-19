@@ -45,10 +45,8 @@ function taskInitReducer (state) {
   const {cells} = state.permutationText;
   const {width, height} = state.symbols;
 
-  xorText = {
-    ...xorText, cellWidth: width,
-    cellHeight: height, permTextCells: cells, cells: [...cells], nbCells: cells.length
-  };
+  xorText = {...xorText, cellWidth: width, cellHeight: height};
+  xorText = applyRefreshedData(xorText, cells);
   xorText = updateGridVisibleRows(xorText);
   return {...state, xorText};
 }

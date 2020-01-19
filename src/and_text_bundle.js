@@ -49,10 +49,10 @@ function taskInitReducer (state) {
   const dump = {
     andMask: (addAnd) ?  [0, 0, 0] : [4095, 4095, 4095]
   };
-
+  andText = applyRefreshedData(andText, cells);
   andText = {
     ...andText, cellWidth: width, dump,
-    cellHeight: height, xorCells: cells, cells: [...cells], nbCells: cells.length
+    cellHeight: height
   };
   andText = updateGridVisibleRows(andText);
   return {...state, andText};
