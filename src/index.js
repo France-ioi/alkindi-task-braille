@@ -17,7 +17,7 @@ import SubstitutionsBundle from './substitutions_bundle';
 import DecipheredTextBundle from './deciphered_text_bundle';
 import HintsBundle from './hints_bundle';
 import WorkspaceBundle from './workspace_bundle';
-import {dumpSubstitutions, loadSubstitutions} from './utils';
+import {loadSubstitutions} from './utils';
 
 const TaskBundle = {
   actionReducers: {
@@ -34,9 +34,9 @@ const TaskBundle = {
     XORTextBundle,
     ANDTextBundle,
     FrequencyAnalysisBundle,
-    // SubstitutionsBundle,
+    SubstitutionsBundle,
     // DecipheredTextBundle,
-    // HintsBundle,
+    HintsBundle,
     WorkspaceBundle,
   ],
   selectors: {
@@ -72,20 +72,24 @@ function appInitReducer (state, _action) {
 }
 
 function taskInitReducer (state, _action) {
-  // const substitutionSpecs = new Array(numMessages).fill([]);
-  // const substitutions = loadSubstitutions(alphabet,  hints, substitutionSpecs);
-  return {...state, /*substitutions,*/ taskReady: true};
+  return state;
 }
 
 function taskRefreshReducer (state, _action) {
-  // const dump = dumpSubstitutions(alphabet, state.substitutions);
-  // const substitutions = loadSubstitutions(alphabet, hints, dump);
-  return {...state,/*substitutions*/};
+ return state;
 }
 
 function getTaskAnswer (state) {
-  const {permutationText, xorText, andText} = state;
+  const {taskData: {alphabet}, permutationText, xorText, andText} = state;
   return {
+    substitutions: state.substitutions.cells
+    .reduce((arr, {editable}, index) => {
+        const rank = alphabet.indexOf(editable);
+        if (rank !== -1) {
+          arr.push([index, rank]);
+        }
+        return arr;
+      }, []),
     permutation: permutationText.dump,
     xor: xorText.dump,
     and: andText.dump
@@ -93,16 +97,19 @@ function getTaskAnswer (state) {
 }
 
 function taskAnswerLoaded (state, {payload: {answer}}) {
-  const {permutation, xor, and} = answer;
+  const {alphabet, hints} = state.taskData;
+  const {substitutions: subs, permutation, xor, and} = answer;
+  const substitutions = loadSubstitutions(alphabet, hints, subs);
   return update(state, {
+    substitutions: {$set: substitutions},
     permutationText: {dump: {$set: permutation}},
     xorText: {dump: {$set: xor}},
     andText: {dump: {$set: and}}
   });
 }
 
-function getTaskState (_state) {
-  return {};
+function getTaskState (state) {
+  return state;
 }
 
 function taskStateLoaded (state, {payload: {_dump}}) {

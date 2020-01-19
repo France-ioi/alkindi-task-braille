@@ -42,11 +42,16 @@ function taskInitReducer (state) {
   if (!andText) {
     return state;
   }
+  const {addAnd} = state.taskData.version;
   const {cells} = state.permutationText;
   const {width, height} = state.symbols;
 
+  const dump = {
+    andMask: (addAnd) ?  [0, 0, 0] : [4095, 4095, 4095]
+  };
+
   andText = {
-    ...andText, cellWidth: width,
+    ...andText, cellWidth: width, dump,
     cellHeight: height, xorCells: cells, cells: [...cells], nbCells: cells.length
   };
   andText = updateGridVisibleRows(andText);

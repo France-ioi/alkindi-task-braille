@@ -1,5 +1,3 @@
-// import React from 'react';
-// import {connect} from 'react-redux';
 import {createSymbolStructure, createSingleSymbol} from './utils';
 
 export const RADIUS = 3;
@@ -10,7 +8,6 @@ export const BETWEEN_SYM_VT = 6 * (2 * RADIUS);
 
 function appInitReducer (state, _action) {
   const {cells, width, height} = createSymbolStructure();
-  //const symbolsMap = generateBitmasks(12);
   return {
     ...state, symbols: {
       cells,

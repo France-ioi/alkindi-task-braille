@@ -1,12 +1,12 @@
 var {generate} = require("../bebras-modules/pemFioi/sentences_2");
-var {range} = require("range");
 var seedrandom = require("seedrandom");
 var {shuffle} = require("shuffle");
-// var Benchmark = require('benchmark');
 
 /**
  * Default constants
  */
+
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 const symbolAlphabet = [
   2166,
@@ -43,12 +43,6 @@ const XOR_MASK = [
   3613
 ];
 
-// const gridColumns = [ // symbol's num values in 4x3 grid,
-//   [11, 8, 5, 2],      // indexes by columns,
-//   [10, 7, 4, 1],      // in bit positions ex: index=11, (11 - index) = 0 (bit position)
-//   [9, 6, 3, 0]
-// ];
-
 
 const colMasks = [
   1 << 2 | 1 << 5 | 1 << 8 | 1 << 11, // 2340
@@ -57,7 +51,7 @@ const colMasks = [
 ];
 
 
-const _elements = [
+const elements = [
   [0, 0],
   [0, 1],
   [0, 2],
@@ -106,37 +100,62 @@ module.exports.requestHint = function (args, callback) {
 };
 
 module.exports.gradeAnswer = function (args, task_data, callback) {
-  const version = parseInt(args.task.params.version);
   const {
-    publicData: {alphabet, messages},
-    privateData
+    privateData: {clearText}
   } = generateTaskData(args.task);
 
-  let {substitutions: submittedKeys} = JSON.parse(args.answer.value);
-  submittedKeys = submittedKeys.map(cells =>
-    cells.map(i => (i === -1 ? " " : alphabet[i])).join("")
-  );
+  const {substitutions} = JSON.parse(args.answer.value);
 
-  const hintsRequested = getHintsRequested(args.answer.hints_requested);
+  const correctLetters = [];
+  for (let i=0; i< substitutions[0].length; i++) {
+    const [numValue, alphabetIndex] = substitutions[0][i];
+     if (symbolAlphabet[alphabetIndex] === numValue) {
+       correctLetters.push(alphabet[alphabetIndex]);
+     }
+  }
 
-  function gradeByVersion (version) {
-    const {numMessages = 1} = versions[version];
+  const evalLength = 200; /* Score on first 200 characters only */
 
-    switch (numMessages) {
-      case 1:
-        {
-          const {cipherText} = messages[0];
-          const {clearText} = privateData[0];
-          return gradeSingleMessage(alphabet, cipherText, clearText, hintsRequested[0] || [], submittedKeys[0]);
-        }
-      case 50:
-        {
-          return grade50Messages(alphabet, messages, privateData, hintsRequested, submittedKeys);
-        }
+  let evalClearText = '';
+  let j = 0;
+  for (let i = 0; i < evalLength; i++) {
+    if (!alphabet.includes(clearText[j])) {
+      j++;
+    }
+    evalClearText += clearText[j];
+    j++;
+  }
+
+  let correctChars = 0;
+  for (let i = 0; i < evalLength; i += 1) {
+    if (correctLetters.includes(evalClearText[i])) {
+      correctChars += 1;
     }
   }
 
-  callback(null, gradeByVersion(version));
+  const hintsRequested = getHintsRequested(args.answer.hints_requested);
+
+  let score = 0,
+    message =
+      "Il y a au moins une différence entre les 200 premiers caractères de votre texte déchiffré et ceux du texte d'origine.";
+
+  const nHints2 = (hintsRequested.filter(h => h.type === 'type_2')).length || 0;
+
+  if (nHints2 !== 0) {
+    message = "Vous avez demandé tous les indices !";
+  } else {
+    if (correctChars == evalLength) {
+      const nHints1 = (hintsRequested.filter(h => h.type === 'type_1')).length || 0;
+      const nHints = hintsRequested.length;
+
+      score = Math.max(0, 100 - (nHints1 * 10));
+      message = `Bravo, vous avez bien déchiffré le texte. Vous avez utilisé ${nHints} indice${
+        nHints > 1 ? "s" : ""
+        }.`;
+    }
+  }
+
+  callback(null, {score, message});
 };
 
 /**
@@ -239,13 +258,13 @@ function applyXORMask (clearSymbols) {
 // }
 
 
-function applyPermutation (data, elements, permutation) {
+function applyPermutation (data, _elements, permutation) {
 
   return data.map(item => {
     const flipped = [];
 
-    for (let i = 0; i < elements.length; i++) {
-      const el_str = elements[i].toString();
+    for (let i = 0; i < _elements.length; i++) {
+      const el_str = _elements[i].toString();
       const pr_str = permutation[i].toString();
       if (el_str === pr_str || flipped.includes(pr_str)) {
         continue;
@@ -253,10 +272,10 @@ function applyPermutation (data, elements, permutation) {
       flipped.push(el_str);
 
       let from, to;
-      if (elements[i][1] < permutation[i][1]) { // to get the shift >> | << sign correcly
-        from = elements[i], to = permutation[i];
+      if (_elements[i][1] < permutation[i][1]) { // to get the shift >> | << sign correcly
+        from = _elements[i], to = permutation[i];
       } else {
-        to = elements[i], from = permutation[i];
+        to = _elements[i], from = permutation[i];
       }
 
       const value1 = item[from[0]];
@@ -280,12 +299,17 @@ function applyPermutation (data, elements, permutation) {
   });
 }
 
-
+const versions = [
+  [],
+  {addPerm: false, addXor: false, addAnd: false},
+  {addPerm: true, addXor: false, addAnd: true},
+  {addPerm: true, addXor: true, addAnd: true}
+];
 
 // module.exports.generateTaskData =
 function generateTaskData (task) {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  // const version = parseInt(task.params.version) || 1;
+  const version = parseInt(task.params.version) || 1;
+  const {addPerm, addXor} = versions[version];
 
   const rng0 = seedrandom(task.random_seed + 6);
   const minLength = 2000;
@@ -293,10 +317,11 @@ function generateTaskData (task) {
 
   const clearSymbols = textTo3Symbols(alphabet, clearText);
 
-  const xorSymbols = applyXORMask(clearSymbols);
+  const xorSymbols = addXor ? applyXORMask(clearSymbols) : clearSymbols;
 
-  const permutation = generatePermutation(_elements, rng0);
-  const cipherSymbols = applyPermutation(xorSymbols, _elements, permutation);
+  const permutation = generatePermutation(elements, rng0);
+
+  const cipherSymbols = addPerm ? applyPermutation(xorSymbols, elements, permutation) : xorSymbols;
 
   //debugging...
   // const permutation = [...elements];
@@ -305,47 +330,21 @@ function generateTaskData (task) {
   //   2925, 2457, 3294
   // ]], permutation);
 
-  //  var suite = new Benchmark.Suite;
-  //  // add tests
-  //   suite.add('applyPermutation2: num:new', function () {
-  //     applyPermutation2([[
-  //       2925, 2457, 3294
-  //     ]], permutation);
+  // hints per message
+  const hintsRequested = getHintsRequested(task.hints_requested);
 
-  //   })
-  //     .add('applyPermutation1: num', function () {
-  //       applyPermutation([[
-  //         2925, 2457, 3294
-  //       ]], permutation);
-  //     })
-  //     // add listeners
-  //     .on('cycle', function (event) {
-  //       console.log(String(event.target));
-  //     })
-  //     .on('complete', function () {
-  //       console.log('Fastest is ' + this.filter('fastest').map('name'));
-  //     })
-  //     // run async
-  //     .run({'async': true});
-  //
-  //
-  // const equals = [
-  //   [1971, 756, 2925]
-  // ].map((arr) => arr.reduce((r, n, i) => r && n === cipherSymbols[0][i], true));
-  // console.log('cipherSymbols equal:', equals);
-
-  // console.log('cipherSymbols :', cipherSymbols);
-
-  // // hints per message
-  // const hintsRequested = getHintsRequested(task.hints_requested);
-
+  const hints = grantHints(hintsRequested);
 
   const publicData = {
-    cipherSymbols
+    alphabet,
+    cipherSymbols,
+    hints,
+    version: versions[version]
   };
 
   const privateData = {
-    permutation
+    permutation,
+    clearText
   };
 
   return {publicData, privateData};
@@ -357,43 +356,41 @@ function generatePermutation (deck, rngKeys) {
   return key;
 }
 
-module.exports.generateTaskData = function () {
-  // const mix = [2, 9, 3, 4, 5, 6, 7, 8, 1];
-  // const perm = mix.map(v => _elements[v - 1]);
+// module.exports.generateTaskData = function () {
+//   // const mix = [2, 9, 3, 4, 5, 6, 7, 8, 1];
+//   // const perm = mix.map(v => _elements[v - 1]);
 
-  // const cipherSymbols = applyPermutation([[
-  //   2925, 2457, 3294
-  // ]], _elements, perm);
+//   // const cipherSymbols = applyPermutation([[
+//   //   2925, 2457, 3294
+//   // ]], _elements, perm);
+
+function hintRequestEqual (h1, h2) {
+  return (
+    h1.cellRank === h2.cellRank &&
+    h1.type == h2.type
+  );
+}
 
 
+function getHintsRequested (hints_requested) {
+  return (hints_requested
+    ? JSON.parse(hints_requested)
+    : []
+  )
+    .filter(hr => hr !== null)
+    .map(hint => (typeof hint === "string") ?  JSON.parse(hint) : hint);
+}
 
-  const editedPairs = {
-    '0': {
-      rank: 1
-    },
-    '1': {
-      rank: 8
-    },
-    '8': {
-      rank: 0
+
+function grantHints (hintRequests) {
+  return hintRequests.map(function (hintRequest) {
+    let symbol;
+    let {messageIndex, cellRank, type} = hintRequest;
+    if (type === "type_1") {
+      symbol = symbolAlphabet.includes(cellRank) ? symbolAlphabet[cellRank] : null;
+    } else if (type === "type_2") {
+      return {messageIndex, cellRank, symbol: '', key: symbolAlphabet, type};
     }
-  };
-
-  const [ele, perm] = Object.keys(editedPairs)
-  .map((k) =>
-    [_elements[parseInt(k)], _elements[editedPairs[k].rank]]
-  ).reduce((ar, dup) => {
-    ar[0].push(dup[0]);
-    ar[1].push(dup[1]);
-    return ar;
-  },[[],[]]);
-
-
-  const cipherSymbols = applyPermutation([[
-    2925, 2457, 3294
-  ]], ele, perm);
-
-  console.log('cipherSymbols :', cipherSymbols);
-
-
+    return {messageIndex, cellRank, symbol, type};
+  });
 }

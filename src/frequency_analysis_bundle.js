@@ -2,8 +2,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {range} from 'range';
-import {selectTaskData} from './utils';
-
 
 const referenceFrequencies = [
   {symbol: "E", proba: 0.1715},
@@ -34,37 +32,64 @@ const referenceFrequencies = [
   {symbol: "K", proba: 0.0005}
 ];
 
+const frequencyAlphabet = 'EASITNRULODCPMVQFBGHJXYZWK';
+
 function appInitReducer (state, _action) {
-  return {...state, frequencyAnalysis: {andTextCells: null}};
+  const visibleLetters = new Array(frequencyAlphabet.length).fill(null);
+  return {...state, frequencyAnalysis: {andTextCells: null, substitutionCells: null, visibleLetters}};
 }
 
+
 function frequencyAnalysisLateReducer (state) {
-  if (state.frequencyAnalysis && state.andText && state.andText.cells) {
-    let {frequencyAnalysis} = state;
+
+  let {frequencyAnalysis} = state;
+  let frequencyChanged = false;
+
+  if (frequencyAnalysis && state.andText && state.andText.cells) {
     let {andTextCells} = frequencyAnalysis;
-    if (andTextCells === state.andText.cells) {
-      return state;
-    }
+    if (andTextCells !== state.andText.cells) {
 
-    andTextCells = state.andText.cells;
-    const cells = [];
-    for (let i = 0; i < andTextCells.length; i++) {
-      const symbols = andTextCells[i];
-      cells.push(...symbols);
-    }
-    const alphabet = [];
-    for (let i = 0; i < 4096; i++) {
-      alphabet.push([i, 0]);
-    }
+      andTextCells = state.andText.cells;
+      const cells = [];
+      for (let i = 0; i < andTextCells.length; i++) {
+        const symbols = andTextCells[i];
+        cells.push(...symbols);
+      }
+      const alphabet = [];
+      for (let i = 0; i < 4096; i++) {
+        alphabet.push([i, 0]);
+      }
 
-    let textFrequencies = [];
-    const freqMap = new Map(alphabet);
-    countSymbols(freqMap, cells, 0, cells.length - 1);
-    textFrequencies = normalizeAndSortFrequencies(freqMap.entries());
-
-    frequencyAnalysis = {...frequencyAnalysis, cells, andTextCells, textFrequencies};
-    state = {...state, frequencyAnalysis};
+      let textFrequencies = [];
+      const freqMap = new Map(alphabet);
+      countSymbols(freqMap, cells, 0, cells.length - 1);
+      textFrequencies = normalizeAndSortFrequencies(freqMap.entries());
+      frequencyChanged = true;
+      frequencyAnalysis = {...frequencyAnalysis, cells, andTextCells, textFrequencies};
+    }
   }
+
+  const {substitutions} = state;
+
+  if (frequencyAnalysis && substitutions && substitutions.cells) {
+    let {cells: subsCells} = substitutions;
+    let {substitutionCells, textFrequencies} = frequencyAnalysis;
+
+    if (substitutionCells !== subsCells || frequencyChanged) {
+      const {taskData: {alphabet}} = state;
+      const visibleLetters = new Array(frequencyAlphabet.length).fill(null);
+
+      for (let i = 0; i < alphabet.length; i++) {
+        const {editable, hint} = subsCells[textFrequencies[i].symbol];
+        if (editable) {
+          visibleLetters[frequencyAlphabet.indexOf(editable)] = hint ? {isHint: true} : {isEdited: true};
+        }
+      }
+      frequencyAnalysis = {...frequencyAnalysis, visibleLetters, substitutionCells: subsCells};
+    }
+  }
+
+  state = {...state, frequencyAnalysis};
   return state;
 }
 
@@ -93,12 +118,13 @@ function normalizeAndSortFrequencies (entries) {
 }
 
 function FrequencyAnalysisSelector (state) {
-  const {frequencyAnalysis: {textFrequencies}, symbols: {singleSymbol}} = state;
+  const {frequencyAnalysis: {textFrequencies, visibleLetters}, symbols: {singleSymbol}} = state;
   const scale = 30 / referenceFrequencies.reduce((a, x) => Math.max(a, x.proba), 0);
   return {
     singleSymbol,
     alphabetSize: 26,
     referenceFrequencies,
+    visibleLetters,
     textFrequencies,
     scale
   };
@@ -106,29 +132,29 @@ function FrequencyAnalysisSelector (state) {
 
 class FrequencyAnalysisView extends React.PureComponent {
   render () {
-    const {singleSymbol, alphabetSize, referenceFrequencies, textFrequencies, scale} = this.props;
+    const {singleSymbol, visibleLetters, alphabetSize, referenceFrequencies, textFrequencies, scale} = this.props;
     if (!referenceFrequencies) return false;
     return (
       <div className='clearfix'>
         <h6><b>&nbsp;&nbsp;&nbsp;&nbsp;Frequencies of the 26 most frequent symbols, out of 78 present in the message after applying the AND tool.</b></h6>
         <div style={{float: 'left', width: '100px', height: '108px', fontSize: '10px', lineHeight: '10px', position: 'relative'}}>
-          <div style={{height: '30px', position: 'absolute', top: '0px'}}>
+          <div style={{height: '30px', position: 'absolute', top: '6px'}}>
             {"Fréquences dans le texte :"}
           </div>
-          <div style={{height: '20px', position: 'absolute', top: '32px'}}>
+          <div style={{height: '20px', position: 'absolute', top: '36px'}}>
             {"Symboles du texte :"}
           </div>
-          <div style={{height: '20px', position: 'absolute', top: '56px'}}>
+          <div style={{height: '20px', position: 'absolute', top: '62px'}}>
             {"Substitutions :"}
           </div>
-          <div style={{height: '30px', position: 'absolute', top: '78px'}}>
+          <div style={{height: '30px', position: 'absolute', top: '84px'}}>
             {"Fréquences en français :"}
           </div>
         </div>
         {range(0, alphabetSize).map(index =>
-          <div key={index} style={{marginRight:'4px', float: 'left', width: '20px',  height: '108px', position: 'relative'}}>
+          <div key={index} style={{marginRight: '4px', float: 'left', width: '20px', height: '108px', position: 'relative'}}>
             <TextFrequencyBox index={index} singleSymbol={singleSymbol} cell={textFrequencies[index]} scale={scale} />
-            <ReferenceFrequencyBox index={index} cell={referenceFrequencies[index]} scale={scale} />
+            <ReferenceFrequencyBox index={index} visibleLetters={visibleLetters} cell={referenceFrequencies[index]} scale={scale} />
           </div>)}
       </div>
     );
@@ -161,10 +187,21 @@ class TextFrequencyBox extends React.PureComponent {
 
 class ReferenceFrequencyBox extends React.PureComponent {
   render () {
-    const {cell, scale} = this.props;
+    const {cell, scale, visibleLetters} = this.props;
+    const visibleInfo = visibleLetters[frequencyAlphabet.indexOf(cell.symbol)];
+    let bgColor = "transparent";
+    if (visibleInfo) {
+      if (visibleInfo.isEdited) {
+        bgColor = '#c7c7c7b3';
+      } else {
+        if (visibleInfo.isHint) {
+          bgColor = '#8c8c8cb3';
+        }
+      }
+    }
     return (
       <div style={{position: 'absolute', top: '60px'}}>
-        <div style={{width: '17px', height: '20px', border: '1px solid black', marginBottom: '2px', textAlign: 'center'}}>
+        <div style={{backgroundColor: bgColor, width: '17px', height: '20px', border: '1px solid black', marginBottom: '2px', textAlign: 'center'}}>
           {cell.symbol}
         </div>
         <div style={{width: '20px', height: '30px', verticalAlign: 'top'}}>

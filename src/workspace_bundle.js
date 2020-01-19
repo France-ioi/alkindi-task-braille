@@ -4,17 +4,19 @@ import {connect} from 'react-redux';
 
 function WorkspaceSelector (state) {
   const {
+    taskData: {version},
     views: {CipheredText, PermutatedText, XORText, ANDText, FrequencyAnalysis, Substitution, DecipheredText, HintRequestFeedback, Hints},
   } = state;
 
   return {
-    CipheredText, PermutatedText, XORText, ANDText, FrequencyAnalysis, Substitution, DecipheredText, HintRequestFeedback, Hints,
+    version, CipheredText, PermutatedText, XORText, ANDText, FrequencyAnalysis, Substitution, DecipheredText, HintRequestFeedback, Hints,
   };
 }
 
 class Workspace extends React.PureComponent {
   render () {
     const {
+      version: {addPerm, addXor, addAnd},
       CipheredText, PermutatedText, XORText, ANDText, FrequencyAnalysis, Substitution, DecipheredText, HintRequestFeedback, Hints,
     } = this.props;
     return (
@@ -22,26 +24,37 @@ class Workspace extends React.PureComponent {
         <h2>{"Encrypted message"}</h2>
         <CipheredText />
         <br />
-        <h2>{"Permutation:"}</h2>
-        <PermutatedText />
-        <br />
-        <h2>{"XOR Mask:"}</h2>
-        <XORText />
-        <br />
-        <h2>{"AND Mask:"}</h2>
-        <ANDText />
-        <br />
+        {addPerm && (<>
+          <h2>{"Permutation:"}</h2>
+          <PermutatedText />
+          <br />
+        </>)
+        }
+        {addXor && (<>
+          <h2>{"XOR Mask:"}</h2>
+          <XORText />
+          <br />
+        </>)
+        }
+        {addAnd && (<>
+          <h2>{"AND Mask:"}</h2>
+          <ANDText />
+          <br />
+        </>)
+        }
         <h2>{"Frequency Analysis"}</h2>
         <FrequencyAnalysis />
         <br />
         <h2>Substitution:</h2>
         <div className="clearfix">
           <div>
-            {/* <Substitution index={0} /> */}
+            <Substitution index={0} />
           </div>
         </div>
-        {/* <Hints /> */}
-        {/* <HintRequestFeedback /> */}
+        <br />
+        <h2>Hints:</h2>
+        <Hints />
+        <HintRequestFeedback />
         <h2>{"Texte déchiffré"}</h2>
         {/* <DecipheredText /> */}
       </div>

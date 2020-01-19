@@ -1,6 +1,10 @@
 import React from 'react';
 import update from 'immutability-helper';
+import {range} from 'range';
 import {RADIUS, BETWEEN_DOTS, BETWEEN_SYM_HZ, BETWEEN_SYM_VT} from './symbols_bundle';
+
+
+const size = 4096;
 
 const colMasks = [
   1 << 2 | 1 << 5 | 1 << 8 | 1 << 11, // 2340
@@ -134,40 +138,27 @@ export function createSingleSymbol () {
   let cx = RADIUS + 1;
   const y = RADIUS + 1;
   let cy = y;
-    for (let xi = 0; xi < 3; xi++) {
-      cy = y;
-      for (let yi = 0; yi < 4; yi++) {
-        const key = `d${0}_${(yi * 3) + xi}`;
-        cells.push(
-          <circle
-            key={key}
-            className={`${key}`}
-            cx={cx}
-            cy={cy}
-            r={RADIUS}
-            fill='inherit'
-          />);
-        cy += BETWEEN_DOTS;
-      }
-      cx += BETWEEN_DOTS;
+  for (let xi = 0; xi < 3; xi++) {
+    cy = y;
+    for (let yi = 0; yi < 4; yi++) {
+      const key = `d${0}_${(yi * 3) + xi}`;
+      cells.push(
+        <circle
+          key={key}
+          className={`${key}`}
+          cx={cx}
+          cy={cy}
+          r={RADIUS}
+          fill='inherit'
+        />);
+      cy += BETWEEN_DOTS;
     }
-    cy -= BETWEEN_DOTS;
-    cx -= BETWEEN_DOTS;
+    cx += BETWEEN_DOTS;
+  }
+  cy -= BETWEEN_DOTS;
+  cx -= BETWEEN_DOTS;
 
-    return {cells, width: cx + RADIUS + 1, height: cy + RADIUS + 1};
-}
-
-
-function range (til) {
-  var x = 0, xs = [];
-  while (x < til) xs.push(x++);
-  return xs;
-}
-
-export function generateBitmasks (n) {
-  return range(Math.pow(2, n)).map(function (x) {
-    return new Array(n).fill('0').join('').concat(x.toString(2)).slice(-n);
-  });
+  return {cells, width: cx + RADIUS + 1, height: cy + RADIUS + 1};
 }
 
 
@@ -278,23 +269,31 @@ export function getClassNames (colorClass, borderClass) {
 
 
 export function makeSubstitution (alphabet) {
-  const size = alphabet.length;
-  const cells = alphabet.split('').map(function (c, rank) {
+  const cells = range(0, size).map(function (c, rank) {
     return {rank, rotating: c, editable: null, locked: false, conflict: false};
   });
   const nullPerm = new Array(size).fill(-1);
-  return {alphabet, size, cells, forward: nullPerm, backward: nullPerm};
+
+  return {alphabet, size, selectedAlphabet: null, cells, forward: nullPerm, backward: nullPerm};
 }
 
-export function dumpSubstitutions (alphabet, substitutions) {
-  return substitutions.map(substitution =>
-    substitution.cells.map(({editable, locked}) =>
-      [alphabet.indexOf(editable), locked ? 1 : 0]));
+export function dumpSubstitutions (alphabet, substitution) {
+  return substitution.cells.reduce((arr, {editable, locked}, index) => {
+      const rank = alphabet.indexOf(editable);
+      if (rank !== -1) {
+        arr.push([index, [rank, locked ? 1 : 0]]);
+      }
+      return arr;
+    }, []);
 }
 
-export function loadSubstitutions (alphabet, hints, substitutionDumps) {
-  const allHints = hints.filter(hint => hint.type === 'type_3');
-  return substitutionDumps.map((cells, substitutionIndex) => {
+export function loadSubstitutions (alphabet, hints, substitutionDump) {
+  const allHints = hints.filter(hint => hint.type === 'type_2');
+    const cells = new Array(size).fill(-1);
+    for (let i = 0; i < substitutionDump.length; i++) {
+      const [index, cell] = substitutionDump[i];
+      cells[index] = cell;
+    }
     const $cells = [];
     cells.forEach((cell, cellIndex) => {
       /* Locking information is not included in the answer. */
@@ -305,29 +304,26 @@ export function loadSubstitutions (alphabet, hints, substitutionDumps) {
         locked: {$set: locked !== 0},
       };
     });
-    hints.forEach(({messageIndex: i, cellRank: j, symbol, type}) => {
-      if (substitutionIndex === i && type !== 'type_3') {
+    hints.forEach(({cellRank: j, symbol, type}) => {
+      if (type !== 'type_2') {
         $cells[j] = {
           editable: {$set: symbol},
           hint: {$set: true},
         };
       }
     });
-    allHints.forEach(({messageIndex: i, key}) => {
-      if (substitutionIndex === i) {
-        key.split('').forEach((symbol, j) => {
-          $cells[j] = {
-            editable: {$set: symbol},
-            hint: {$set: true},
-          };
-        });
-      }
+    allHints.forEach(({key}) => {
+      key.forEach((j, rank) => {
+        $cells[j] = {
+          editable: {$set: alphabet[rank]},
+          hint: {$set: true},
+        };
+      });
     });
     let substitution = makeSubstitution(alphabet);
     substitution = update(substitution, {cells: $cells});
     substitution = markSubstitutionConflicts(updatePerms(substitution));
     return substitution;
-  });
 }
 
 export function editSubstitutionCell (substitution, rank, symbol) {
@@ -376,9 +372,9 @@ export function updatePerms (substitution) {
   return {...substitution, backward};
 }
 
-export function applySubstitutions (substitutions, position, rank) {
+export function applySubstitutions (substitution, rank) {
   const result = {rank, locks: 0, trace: []};
-  applySubstitution(substitutions[position], result);
+  applySubstitution(substitution, result);
   return result;
 }
 
@@ -403,132 +399,4 @@ export function applySubstitution (substitution, result) {
       result.collision = true;
     }
   }
-}
-
-const replaceStarMatches = (index, matched) => " ".repeat(matched[index].length);
-// place *, ? with " " and "-" to help with highlight coloring them
-const replacer = (transformer, regexMatch) => {
-  const charsList = [];
-  const fullText = transformer.reduce((str, item) => {
-    if (typeof item === 'number') {
-      const letter = regexMatch[item];
-      str += letter; // replace a,b,c,d
-      if (charsList.indexOf(letter) === -1) {
-        charsList.push(letter);
-      }
-    } else if (typeof item === 'function') {
-      str += item(regexMatch); // replace *
-    } else {
-      str += item; // replace ?
-    }
-    return str;
-  }, "");
-  return [fullText, charsList];
-};
-
-export function patternToRegex (pattern) {
-  let regex = "";
-  const charRegex = "([A-Z])";
-  // const starRegex = "(.{0,12}?)";
-  const starRegex = "([A-Z]*?)";
-  const dotRegex = "[A-Z]"; // for ? in pattern
-  const charList = [];
-  const transformer = [];
-
-  for (let index = 0; index < pattern.length; index++) {
-    const curChar = pattern[index];
-    switch (curChar) {
-      case '?': {
-        regex += dotRegex;
-        transformer.push("-");
-        break;
-      }
-      case '*': {
-        regex += starRegex;
-        charList.push("*");
-        transformer.push(replaceStarMatches.bind(null, charList.length));
-        break;
-      }
-      default: {
-        if (/[A-Z]/.test(curChar)) {
-          regex += curChar;
-          transformer.push(".");
-        } else {
-          const pos = charList.indexOf(curChar);
-          if (pos === -1) { //new group
-            charList.push(curChar);
-            transformer.push(charList.length);
-            regex += charRegex;
-          } else {
-            const groupIndex = pos + 1;
-            regex += "\\" + (groupIndex).toString(); // previous group reference
-            transformer.push(groupIndex);
-          }
-        }
-      }
-    }
-  }
-  return [new RegExp(regex, 'gm'), replacer.bind(null, transformer)];
-}
-
-export function calulateHighlightIndexes (match, replacerFn, charColors, starColor, dotColor, capcColor) {
-  let start = match.index;
-  const [fullMatch, chars] = replacerFn(match);
-  const end = start + fullMatch.length - 1;
-  const colors = {};
-  let c = 0;
-  for (let index = start; index <= end; index++) {
-    const colorIndex = chars.indexOf(fullMatch[c]);
-    colors[index] = colorIndex === -1 ? (fullMatch[c] === " " ? starColor : (fullMatch[c] === "-" ? dotColor : capcColor)) : charColors[colorIndex];
-    c++;
-  }
-  return [start, end, colors];
-}
-
-export function regexSearch (regex, text) {
-  const matches = [];
-  let m;
-  while ((m = regex.exec(text)) !== null) {
-    // This is necessary to avoid infinite loops with zero-width matches
-    // if (m.index === regex.lastIndex) {
-    //   regex.lastIndex++;
-    // }
-    regex.lastIndex = m.index + 1;
-    matches.push(m);
-  }
-  return matches;
-}
-
-export function getStartEndOfVisibleRows (props) {
-  const {scrollTop, cellHeight, nbCells, pageRows, pageColumns} = props;
-  const firstRow = Math.floor(scrollTop / cellHeight);
-  const lastRow = Math.min(firstRow + pageRows - 1, Math.ceil(nbCells / pageColumns) - 1);
-  const rowStartPos = firstRow * pageColumns;
-  const rowEndPos = (lastRow * pageColumns) + pageColumns - 1;
-  return [rowStartPos, rowEndPos];
-}
-
-export function getUpdatedRows (i, focusStart, focusEnd, colors, rows) {
-  const newRows = [];
-  rows.forEach((row) => {
-    const newCol = [];
-    row.columns.forEach((col) => {
-      let borderClass = null;
-      let colorClass = null;
-      colorClass = colors[i];
-      if (i >= focusStart && i <= focusEnd) {
-        if (i === focusStart) {
-          borderClass = "highlight highlight-start";
-        } else if (i === focusEnd) {
-          borderClass = "highlight highlight-end";
-        } else {
-          borderClass = "highlight highlight-mid";
-        }
-      }
-      newCol.push(update(col, {colorClass: {$set: colorClass}, borderClass: {$set: borderClass}}));
-      i++;
-    });
-    newRows.push(update(row, {columns: {$set: newCol}}));
-  });
-  return newRows;
 }
