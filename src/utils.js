@@ -1,16 +1,31 @@
 import React from 'react';
 import update from 'immutability-helper';
 import {range} from 'range';
-import {RADIUS, BETWEEN_DOTS, BETWEEN_SYM_HZ, BETWEEN_SYM_VT} from './symbols_bundle';
+import {symSpecV1 as symSpecV1Fn} from './symbols_bundle';
+const symSpecV1  = symSpecV1Fn();
 
 
 const size = 4096;
 
-const colMasks = [
+export const elements = [
+  [0, 0],
+  [0, 1],
+  [0, 2],
+  [1, 0],
+  [1, 1],
+  [1, 2],
+  [2, 0],
+  [2, 1],
+  [2, 2],
+];
+
+export const colMasks = [
   1 << 2 | 1 << 5 | 1 << 8 | 1 << 11, // 2340
   1 << 1 | 1 << 4 | 1 << 7 | 1 << 10, // 1170
   1 << 0 | 1 << 3 | 1 << 6 | 1 << 9  // 585
 ];
+
+
 
 
 export function applyPermutation (data, elements, permutation) {
@@ -77,7 +92,7 @@ export function applyXOR (data, xorMask) {
 }
 
 
-export function applyAND (newData, andMask, oldData) {
+export function applyAND (newData, andMask) {
   const [one, two, three] = andMask;
   if (one === 0 && two === 0 && three === 0) {
     const out = [];
@@ -91,11 +106,9 @@ export function applyAND (newData, andMask, oldData) {
   for (let i = 0; i < newData.length; i++) {
     const item = [];
     for (let pos = 0; pos < andMask.length; pos++) {
-      if (andMask[pos]) {
-        item.push(newData[i][pos] & andMask[pos]);
-      } else {
-        item.push(oldData ? oldData[i][pos] : 0);
-      }
+        item.push(newData[i][0] & andMask[0]);
+        item.push(newData[i][1] & andMask[1]);
+        item.push(newData[i][2] & andMask[2]);
     }
     out.push(item);
   }
@@ -104,7 +117,14 @@ export function applyAND (newData, andMask, oldData) {
 
 
 // create the visual positioning of 9X4 symbols cell.
-export function createSymbolStructure () {
+export function createSymbolStructure (spec) {
+  const {
+    RADIUS,
+    BETWEEN_DOTS,
+    BETWEEN_SYM_HZ,
+    BETWEEN_SYM_VT
+  } = spec;
+
   const cells = [];
   let cx = BETWEEN_SYM_HZ / 2;
   const y = BETWEEN_SYM_VT / 2;
@@ -133,7 +153,55 @@ export function createSymbolStructure () {
   return {cells, width: cx - BETWEEN_SYM_HZ + BETWEEN_SYM_HZ / 2, height: cy - BETWEEN_DOTS + (BETWEEN_SYM_VT / 2)};
 }
 
-export function createSingleSymbol () {
+export function createSymbolStructureV2 (spec) {
+  const {
+    RADIUS,
+    BETWEEN_DOTS,
+    BETWEEN_SYM_HZ,
+    // BETWEEN_SYM_VT
+  } = spec;
+
+  const cells = [];
+  let cx = RADIUS + 1;
+  const y = RADIUS + 1;
+  let cy = y;
+  for (let s = 0; s < 3; s++) {
+    for (let xi = 0; xi < 3; xi++) {
+      cy = y;
+      for (let yi = 0; yi < 4; yi++) {
+        const key = `d${s}_${(yi * 3) + xi}`;
+        cells.push(
+          <circle
+            key={key}
+            className={`${key}`}
+            cx={cx}
+            cy={cy}
+            r={RADIUS}
+            fill='inherit'
+          />);
+        cy += BETWEEN_DOTS;
+      }
+      cx += BETWEEN_DOTS;
+    }
+
+    cx -= BETWEEN_DOTS;
+    cy -= BETWEEN_DOTS;
+    cx += BETWEEN_SYM_HZ;
+  }
+
+  return {
+    cells,
+    width: cx - BETWEEN_SYM_HZ + RADIUS + 1,
+    height: cy + RADIUS + 1
+  };
+}
+
+export function createSingleSymbol (spec) {
+  const {
+    RADIUS,
+    BETWEEN_DOTS,
+  } = spec;
+
   const cells = [];
   let cx = RADIUS + 1;
   const y = RADIUS + 1;
@@ -190,7 +258,7 @@ export function sortedArrayHasElement (a, x) {
   return a[i] === x;
 }
 
-export function updateGridGeometry (grid) {
+export function updateGridGeometry (grid, initScroll=symSpecV1.BETWEEN_SYM_VT / 2 - 5) {
   const {width, cellWidth, cellHeight, scrollTop, nbCells} = grid;
   const scrollBarWidth = 20;
   const pageColumns = Math.max(5, Math.floor((width - scrollBarWidth) / cellWidth));
@@ -199,7 +267,11 @@ export function updateGridGeometry (grid) {
   const height = (pageRows * cellHeight);
   const bottom = Math.ceil(nbCells / pageColumns) * cellHeight - 1;
   const maxTop = Math.max(0, bottom + 1 - pageRows * cellHeight);
-  return {...grid, width: newWidth, height, pageColumns, pageRows, scrollTop: Math.min(maxTop - BETWEEN_SYM_VT / 2 - 5, Math.max(BETWEEN_SYM_VT / 2 - 5, scrollTop)), bottom, maxTop};
+
+  return {...grid, width: newWidth, height, pageColumns,
+     pageRows, scrollTop: Math.min(maxTop - initScroll,
+      Math.max(initScroll, scrollTop)),
+      bottom, maxTop};
 }
 
 export function updateGridVisibleRows (grid, options) {
@@ -218,37 +290,6 @@ export function updateGridVisibleRows (grid, options) {
     for (let colIndex = 0; colIndex < pageColumns; colIndex += 1) {
       const data = getCell(rowStartPos + colIndex);
       rowCells.push({index: colIndex, ...data});
-    }
-    rows.push({index: rowIndex, columns: rowCells});
-  }
-  return {...grid, visible: {rows}};
-}
-
-export function updateGridGeometry2 (grid) {
-  const {width, height, cellWidth, cellHeight, scrollTop, nbCells} = grid;
-  const scrollBarWidth = 20;
-  const pageColumns = Math.max(30, Math.floor((width - scrollBarWidth) / cellWidth));
-  const pageRows = Math.max(5, Math.ceil(height / cellHeight));
-  const bottom = Math.ceil(nbCells / pageColumns) * cellHeight - 1;
-  const maxTop = Math.max(0, bottom + 1 - pageRows * cellHeight);
-  return {...grid, pageColumns, pageRows, scrollTop: Math.min(maxTop, scrollTop), bottom, maxTop};
-}
-
-export function updateGridVisibleRows2 (grid, options) {
-  options = options || {};
-  const {nbCells, cellHeight, pageColumns, pageRows, cells, scrollTop} = grid;
-  if (typeof scrollTop !== 'number') {
-    return grid;
-  }
-  const firstRow = Math.floor(scrollTop / cellHeight);
-  const lastRow = Math.min(firstRow + pageRows - 1, Math.ceil(nbCells / pageColumns) - 1);
-  const rows = [];
-  const getCell = options.getCell || (cells ? (index => ({cell: cells[index]})) : (_index => null));
-  for (let rowIndex = firstRow; rowIndex <= lastRow; rowIndex += 1) {
-    const rowStartPos = rowIndex * pageColumns;
-    const rowCells = [];
-    for (let colIndex = 0; colIndex < pageColumns; colIndex += 1) {
-      rowCells.push({index: colIndex, ...getCell(rowStartPos + colIndex)});
     }
     rows.push({index: rowIndex, columns: rowCells});
   }
@@ -332,14 +373,6 @@ export function loadSubstitutions (alphabet, hints, substitutionDump) {
       editable: {$set: rank === -1 ? null : alphabet[rank]},
       locked: {$set: locked !== 0},
     };
-  });
-  hints.forEach(({cellRank: j, symbol, type}) => {
-    if (type !== 'type_2') {
-      $cells[j] = {
-        editable: {$set: symbol},
-        hint: {$set: true},
-      };
-    }
   });
   allHints.forEach(({key}) => {
     key.forEach((j, rank) => {

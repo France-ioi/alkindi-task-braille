@@ -1,22 +1,12 @@
 import React from 'react';
 import classnames from 'classnames';
 import {connect} from 'react-redux';
-import {updateGridGeometry, updateGridVisibleRows, applyPermutation} from './utils';
-import {RADIUS, BETWEEN_DOTS, BETWEEN_SYM_VT, BETWEEN_SYM_HZ} from './symbols_bundle';
+import {elements, updateGridGeometry, updateGridVisibleRows, applyPermutation} from './utils';
 import HTML5Backend from "react-dnd-html5-backend";
 import {DndProvider, DragSource, DropTarget} from "react-dnd";
+import {symSpecV1} from './symbols_bundle';
+const  {RADIUS, BETWEEN_DOTS, BETWEEN_SYM_VT, BETWEEN_SYM_HZ} = symSpecV1();
 
-const elements = [
-  [0, 0],
-  [0, 1],
-  [0, 2],
-  [1, 0],
-  [1, 1],
-  [1, 2],
-  [2, 0],
-  [2, 1],
-  [2, 2],
-];
 
 
 function appInitReducer (state, _action) {
@@ -39,7 +29,7 @@ function taskInitReducer (state) {
     return state;
   }
   const {cipherSymbols} = state.taskData;
-  const {width, height} = state.symbols;
+  const {width, height} = state.symbols.sym3Normal;
 
   const permCells = elements.map((_v, i) => ({rank: i}));
 
@@ -147,7 +137,7 @@ function PermutationViewSelector (state) {
   const {actions, permutationText, symbols} = state;
   const {permutationTextResized, permutationTextScrolled, permutationTextSwapPairs, permutationTextLock} = actions;
   const {permCells, width, height, cellWidth, cellHeight, bottom, pageRows, pageColumns, visible, scrollTop} = permutationText;
-  const {cells} = symbols;
+  const {cells} = symbols.sym3Normal;
   return {
     permutationTextResized, permutationTextScrolled,
     permutationTextSwapPairs, permutationTextLock,
@@ -167,18 +157,27 @@ const BareSubstTarget = props => {
 
   const isDragTarget = typeof connectDropTarget === "function";
   const isDragSource = typeof connectDragSource === "function";
+
   const classes = [
-    isDragSource && "dd_cell-draggable",
+    'drop',
     isDragging && "dragging"
   ];
 
+  const classesTxt = [
+    'dd_txt',
+    isDragSource && "dd_cell-draggable",
+  ];
+
+  let span = (<span className={classnames(classesTxt)}>{target + 1}</span>);
+  if (isDragSource) span = connectDragSource(span);
+
   let el = (
-    <div className={classnames(classes)}>
-      <span className='dd_txt'>{target + 1}</span>
+    <div className={classnames(classes)} >
+      {span}
     </div>
   );
+
   if (isDragTarget) el = connectDropTarget(el);
-  if (isDragSource) el = connectDragSource(el);
   return el;
 };
 
@@ -396,7 +395,7 @@ class PermutationView extends React.PureComponent {
                   padding: '4px'
                 }}>
                 {columns.map(({index, cell}) =>
-                  (<svg
+                  cell ? (<svg
                     key={index}
                     className={`_${cell[0]}a _${cell[1]}b _${cell[2]}c`}
                     width={cellWidth}
@@ -408,7 +407,12 @@ class PermutationView extends React.PureComponent {
                       height: `${cellHeight}px`
                     }} >
                     {cells}
-                  </svg>)
+                  </svg>) : (<div key={index} style={{
+                      position: 'absolute',
+                      left: `${index * cellWidth + 1}px`,
+                      width: `${cellWidth}px`,
+                      height: `${cellHeight}px`
+                    }}></div>)
                 )}
               </div>)
             )}

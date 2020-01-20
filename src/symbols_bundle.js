@@ -1,19 +1,29 @@
-import {createSymbolStructure, createSingleSymbol} from './utils';
+import {createSymbolStructure, createSymbolStructureV2, createSingleSymbol} from './utils';
 
-export const RADIUS = 3;
-export const BETWEEN_DOTS = 2 * (2 * RADIUS);
-export const BETWEEN_SYM_HZ = 4 * (2 * RADIUS);
-export const BETWEEN_SYM_VT = 6 * (2 * RADIUS);
+
+export function symSpecV1 (mut = 1) {
+  const RADIUS = 3 * mut;
+  const BETWEEN_DOTS = 2 * (2 * RADIUS);
+  const BETWEEN_SYM_HZ = 4 * (2 * RADIUS);
+  const BETWEEN_SYM_VT = 6 * (2 * RADIUS);
+  return {
+    RADIUS,
+    BETWEEN_DOTS,
+    BETWEEN_SYM_HZ,
+    BETWEEN_SYM_VT
+  };
+}
 
 
 function appInitReducer (state, _action) {
-  const {cells, width, height} = createSymbolStructure();
+  const sym3Normal = createSymbolStructure(symSpecV1());
+  const sym3Big = createSymbolStructureV2(symSpecV1(3));
+  const sym1Small = createSingleSymbol(symSpecV1(0.5));
   return {
     ...state, symbols: {
-      cells,
-      width,
-      height,
-      singleSymbol: createSingleSymbol()
+      sym3Normal,
+      sym3Big,
+      sym1Small,
     }
   };
 }
@@ -25,8 +35,6 @@ function taskInitReducer (state) {
 function taskRefreshReducer (state) {
   return {...state};
 }
-
-
 
 
 export default {

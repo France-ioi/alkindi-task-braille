@@ -72,8 +72,10 @@ function frequencyAnalysisLateReducer (state) {
       const freqMap = new Map(alphabet);
       countSymbols(freqMap, cells, 0, cells.length - 1);
       textFrequencies = normalizeAndSortFrequencies(freqMap.entries());
+      const totalChars = Array.from(freqMap.values()).reduce((a, count) => count ? a+1 : a, 0);
+      const frequencyCount = textFrequencies.slice(0, referenceFrequencies.length).reduce((a, x) => x.proba ? a+1 : a, 0);
       frequencyChanged = true;
-      frequencyAnalysis = {...frequencyAnalysis, cells, andTextCells, textFrequencies};
+      frequencyAnalysis = {...frequencyAnalysis, cells, andTextCells, textFrequencies, totalChars, frequencyCount};
     }
   }
 
@@ -126,25 +128,31 @@ function normalizeAndSortFrequencies (entries) {
 }
 
 function FrequencyAnalysisSelector (state) {
-  const {frequencyAnalysis: {textFrequencies, visibleLetters}, symbols: {singleSymbol}} = state;
+  const {frequencyAnalysis: {textFrequencies, visibleLetters, totalChars, frequencyCount}, symbols: {sym1Small: singleSymbol}} = state;
   const scale = 30 / referenceFrequencies.reduce((a, x) => Math.max(a, x.proba), 0);
   return {
     singleSymbol,
-    alphabetSize: 26,
     referenceFrequencies,
     visibleLetters,
     textFrequencies,
+    totalChars,
+    frequencyCount,
     scale
   };
 }
 
+const numberStyle = {
+  fontSize: 'medium'
+};
+
 class FrequencyAnalysisView extends React.PureComponent {
   render () {
-    const {singleSymbol, visibleLetters, alphabetSize, referenceFrequencies, textFrequencies, scale} = this.props;
+    const {singleSymbol, visibleLetters, totalChars, frequencyCount, referenceFrequencies, textFrequencies, scale} = this.props;
     if (!referenceFrequencies) return false;
+
     return (
       <div className='clearfix'>
-        <h6><b>&nbsp;&nbsp;&nbsp;&nbsp;Frequencies of the 26 most frequent symbols, out of 78 present in the message after applying the AND tool.</b></h6>
+        <h6><b>&nbsp;&nbsp;&nbsp;&nbsp;Frequencies of the <i style={numberStyle}>{frequencyCount}</i> most frequent symbols, out of { <i style={numberStyle}>{totalChars}</i>} present in the message after applying the AND tool.</b></h6>
         <div style={{float: 'left', width: '100px', height: '108px', fontSize: '10px', lineHeight: '10px', position: 'relative'}}>
           <div style={{height: '30px', position: 'absolute', top: '6px'}}>
             {"Fréquences dans le texte :"}
@@ -159,7 +167,7 @@ class FrequencyAnalysisView extends React.PureComponent {
             {"Fréquences en français :"}
           </div>
         </div>
-        {range(0, alphabetSize).map(index =>
+        {range(0, frequencyCount).map(index =>
           <div key={index} style={{marginRight: '4px', float: 'left', width: '20px', height: '108px', position: 'relative'}}>
             <TextFrequencyBox index={index} singleSymbol={singleSymbol} cell={textFrequencies[index]} scale={scale} />
             <ReferenceFrequencyBox index={index} visibleLetters={visibleLetters} cell={referenceFrequencies[index]} scale={scale} />
@@ -183,7 +191,6 @@ class TextFrequencyBox extends React.PureComponent {
             className={`_${cell.symbol}a`}
             width={singleSymbol.width}
             height={singleSymbol.height}
-            transform={`scale(0.5) translate(-${singleSymbol.width / 2}, -${singleSymbol.height / 2})`}
           >
             {singleSymbol.cells}
           </svg>

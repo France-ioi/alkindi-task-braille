@@ -9,7 +9,8 @@ import React from 'react';
 import {connect} from 'react-redux';
 import update from 'immutability-helper';
 
-import {editSubstitutionCell, updateGridGeometry2, updateGridVisibleRows2, applySubstitutions, getClassNames} from './utils';
+import {updateGridGeometry, updateGridVisibleRows, applySubstitutions, getClassNames} from './utils';
+
 
 function appInitReducer (state, _action) {
   return {
@@ -19,6 +20,7 @@ function appInitReducer (state, _action) {
       scrollTop: 0,
       nbCells: 0,
       substitutionCells: null,
+      decipheredLetters: {}
     }
   };
 }
@@ -34,7 +36,21 @@ function taskRefreshReducer (state) {
   if (!decipheredText) {
     return state;
   }
+  const {hints} = state.taskData;
   const {substitutions: {cells: substitutionCells}, frequencyAnalysis: {cells}} = state;
+
+  const hintsData = {};
+  hints.forEach(({cellRank: j, symbol, type}) => {
+    if (type !== 'type_2') {
+      hintsData[j] = {
+        charAt: symbol,
+        isHint: true,
+      };
+    }
+  });
+
+  decipheredText = update(decipheredText, {decipheredLetters: {$merge: hintsData}});
+
   decipheredText = {...decipheredText, substitutionCells, cells, nbCells: cells.length};
   return applyRefreshedData({...state, decipheredText});
 }
@@ -42,14 +58,13 @@ function taskRefreshReducer (state) {
 function decipheredTextResizedReducer (state, {payload: {width}}) {
   let {decipheredText} = state;
   decipheredText = {...decipheredText, width, height: 4 * decipheredText.cellHeight};
-  decipheredText = updateGridGeometry2(decipheredText);
+  decipheredText = updateGridGeometry(decipheredText, 0);
   return applyRefreshedData({...state, decipheredText});
 }
 
 function decipheredTextScrolledReducer (state, {payload: {scrollTop}}) {
   let {decipheredText} = state;
   decipheredText = {...decipheredText, scrollTop};
-  decipheredText = updateGridGeometry2(decipheredText);
   return applyRefreshedData({...state, decipheredText});
 }
 
@@ -71,27 +86,26 @@ function decipheredTextLateReducer (state, _action) {
 function applyRefreshedData (state) {
   let {taskData: {alphabet}, substitutions, decipheredText} = state;
 
-  const {cells} = decipheredText;
+  const {cells, decipheredLetters} = decipheredText;
   const position = cells.length - 1;
 
   function getCell (index) {
     const ciphered = cells[index];
-    const cell = {position: index, ciphered};
+    let cell = {position: index, ciphered};
     let rank = ciphered;
     if (index <= position) {
       Object.assign(cell, applySubstitutions(substitutions, rank));
       if (cell.rank !== -1) {
         cell.clear = alphabet[cell.rank];
       }
+      Object.assign(cell, decipheredLetters[index] || {charAt: null});
     }
     return cell;
   }
 
-  decipheredText = updateGridVisibleRows2(decipheredText, {getCell});
+  decipheredText = updateGridVisibleRows(decipheredText, {getCell});
   return {...state, decipheredText};
 }
-
-
 
 function decipheredCellEditStartedReducer (state, {payload: {cellRank, symbol}}) {
   return update(state, {editingDecipher: {$set: {cellRank, symbol}}});
@@ -102,18 +116,29 @@ function decipheredCellEditCancelledReducer (state, _action) {
   return update(state, {editingDecipher: {$set: {}}});
 }
 
-function decipheredCellCharChangedReducer (state, {payload: {rank, symbol}}) {
-  let {taskData: {alphabet}, substitutions} = state;
+function decipheredCellCharChangedReducer (state, {payload: {position, symbol}}) {
+  let {taskData: {alphabet}} = state;
   if (symbol.length !== 1 || -1 === alphabet.indexOf(symbol)) {
     symbol = null;
   }
-  const substitution = editSubstitutionCell(substitutions, rank, symbol);
-  return update(state, {substitutions: {$set: substitution}});
+
+  const value = {};
+  value[position] = {
+    charAt: symbol
+  };
+
+  return applyRefreshedData(update(state,
+    {
+      decipheredText: {
+        decipheredLetters: {$merge: value}
+      }
+    }));
+
 }
 
 
 function DecipheredTextViewSelector (state) {
-  const {actions, decipheredText, symbols: {singleSymbol}, editingDecipher} = state;
+  const {actions, decipheredText, symbols: {sym1Small: singleSymbol}, editingDecipher} = state;
   const {decipheredCellEditStarted, decipheredCellEditCancelled, decipheredCellCharChanged, decipheredTextResized, decipheredTextScrolled, schedulingJump} = actions;
   const {width, height, cellWidth, cellHeight, bottom, pageRows, pageColumns, visible, scrollTop} = decipheredText;
   return {
@@ -130,13 +155,14 @@ class DecipheredTextView extends React.PureComponent {
       <div ref={this.refTextBox} onScroll={this.onScroll} style={{position: 'relative', width: width && `${width}px`, height: height && `${height}px`, overflowY: 'scroll'}}>
         {(visibleRows || []).map(({index, columns}) =>
           <div key={index} style={{position: 'absolute', top: `${index * cellHeight}px`}}>
-            {columns.map(({index, position, ciphered, clear, isHint, locked, colorClass, borderClass}) =>
+            {columns.filter(c => c !== null).map(({index, position, ciphered, charAt, clear, isHint, locked, colorClass, borderClass}) =>
               <TextCell key={index} editingDecipher={editingDecipher} singleSymbol={singleSymbol}
                 colorClass={colorClass} borderClass={borderClass}
                 column={index} position={position} ciphered={ciphered}
-                clear={clear} isHint={isHint} locked={locked}
+                clear={clear} charAt={charAt} isHint={isHint} locked={locked}
                 cellWidth={cellWidth} cellHeight={cellHeight}
                 onChangeChar={this.onChangeChar}
+                startHighlighting={this.startHighlighting}
                 onEditingStarted={this.onEditingStarted}
                 onEditingCancelled={this.onEditingCancelled} />)}
           </div>)}
@@ -165,13 +191,17 @@ class DecipheredTextView extends React.PureComponent {
   };
   onChangeChar = (rank, symbol) => {
     symbol = symbol.toUpperCase();
-    this.props.dispatch({type: this.props.decipheredCellCharChanged, payload: {rank, symbol}});
+    this.props.dispatch({type: this.props.decipheredCellCharChanged, payload: {position: rank, symbol}});
   };
 }
 
 class TextCell extends React.PureComponent {
   render () {
-    let {editingDecipher, position, singleSymbol, column, ciphered, clear, isHint, locked, isConflict, cellWidth, cellHeight, colorClass, borderClass} = this.props;
+    let {editingDecipher, position, singleSymbol, column,
+      charAt, ciphered, clear, isHint, locked,
+      cellWidth, cellHeight, colorClass, borderClass} = this.props;
+    const isEmptyCell = ciphered === undefined;
+
     const cellStyle = {
       position: 'absolute',
       left: `${column * (cellWidth)}px`,
@@ -181,13 +211,25 @@ class TextCell extends React.PureComponent {
       borderWidth: '1px 0'
     };
 
-    const noHintSymbol = isHint && !clear;
+    const isConflict = charAt && clear && charAt !== clear;
 
     const editableCellStyle = {
       borderRight: '1px solid #eee',
       textAlign: 'center',
       cursor: 'text',
-      backgroundColor: (isHint || locked) ? ((locked) ? '#e2e2e2' : (noHintSymbol ? '#fcc' : '#a2a2a2')) : '#fff'
+      backgroundColor: (isHint || locked) ? ((locked) ? '#e2e2e2' : (isConflict ? '#fcc' : '#a2a2a2')) : '#fff'
+    };
+
+    if (!isHint && isConflict) {
+      editableCellStyle.backgroundColor = '#fcc';
+    }
+
+    const symbolCellStyle = {
+      width: '100%',
+      height: '26px',
+      borderRight: '1px solid #9e9e9e',
+      borderBottom: '1px solid #ccc',
+      paddingTop: '1px'
     };
 
     let isEditing = false;
@@ -195,43 +237,39 @@ class TextCell extends React.PureComponent {
       isEditing = editingDecipher.cellRank === position;
     }
 
-    if (noHintSymbol) {
-      clear = '✖';
-    }
-
-
     const editableCell = (
-      <div style={editableCellStyle} onClick={this.startEditing}>
+      <div style={editableCellStyle}
+        onClick={!isEmptyCell ? this.startEditing : undefined}>
         {isEditing
           ? <input ref={this.refInput} onChange={this.cellChanged} onKeyDown={this.keyDown}
-            type='text' value={clear || ''} style={{width: '19px', height: '20px', textAlign: 'center'}} />
-          : (clear || '\u00A0')}
+            type='text' value={charAt || clear || ''} style={{width: '20px', height: '20px', textAlign: 'center'}} />
+          : (charAt || clear || '\u00A0')}
       </div>
     );
 
+    if (column === 0) {
+      editableCellStyle.borderLeft = '1px solid #eee';
+      symbolCellStyle.borderLeft = '1px solid #9e9e9e';
+    }
+
     return (
       <div className={`${getClassNames(colorClass, borderClass)}`} style={cellStyle}>
-        <div style={{
-          width: `99%`,
-          height: `26px`,
-          borderRight: '1px solid #9e9e9e',
-          borderBottom: '1px solid #ccc',
-        }}>
-          <div style={{
-            width: `16px`,
-            height: `22px`,
-            borderColor: 'transparent',
-            borderStyle: 'solid',
-            borderWidth: '2px 4px 2px 4px'
-          }}>
-            {(<svg
+        <div style={symbolCellStyle}>
+          <div
+            onMouseDown={!isEmptyCell ? this.startHighlighting : undefined}
+            onMouseUp={!isEmptyCell ? this.endEditing : undefined}
+            style={{
+              width: `17px`,
+              height: `23px`,
+              margin: 'auto'
+            }}>
+            {!isEmptyCell ? (<svg
               className={`_${ciphered}a`}
               width={singleSymbol.width}
               height={singleSymbol.height}
-              transform={`scale(0.5) translate(-${singleSymbol.width / 2}, -${singleSymbol.height / 2})`}
             >
               {singleSymbol.cells}
-            </svg>) || ' '}</div>
+            </svg>) : ' '}</div>
         </div>
         <div style={{width: '100%', height: '20px', textAlign: 'center'}}>{editableCell}</div>
       </div>
@@ -256,15 +294,25 @@ class TextCell extends React.PureComponent {
       event.stopPropagation();
     }
   };
+  endEditing = () => {
+    this.props.onEditingCancelled();
+  };
   startEditing = () => {
     const {isHint, locked, isEditing, position, ciphered} = this.props;
     if (!isHint && !locked && !isEditing) {
       this.props.onEditingStarted(position, ciphered);
+    } else {
+      if (isHint || locked && !isEditing) {
+        this.props.onEditingStarted(-1, ciphered);
+      }
     }
+  };
+  startHighlighting = () => {
+      this.props.onEditingStarted(-1, this.props.ciphered);
   };
   cellChanged = () => {
     const value = this._input.value.substr(-1); /* /!\ IE compatibility */
-    this.props.onChangeChar(this.props.ciphered, value);
+    this.props.onChangeChar(this.props.position, value);
   };
   refInput = (element) => {
     this._input = element;
@@ -275,7 +323,6 @@ export default {
   actions: {
     decipheredTextResized: 'DecipheredText.Resized' /* {width: number, height: number} */,
     decipheredTextScrolled: 'DecipheredText.Scrolled' /* {scrollTop: number} */,
-
     decipheredCellEditStarted: 'DecipheredText.Cell.Edit.Started',
     decipheredCellEditCancelled: 'DecipheredText.Cell.Edit.Cancelled',
     decipheredCellCharChanged: 'DecipheredText.Cell.Char.Changed',

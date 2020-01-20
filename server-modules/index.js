@@ -333,7 +333,7 @@ function generateTaskData (task) {
   // hints per message
   const hintsRequested = getHintsRequested(task.hints_requested);
 
-  const hints = grantHints(hintsRequested);
+  const hints = grantHints(hintsRequested, clearText);
 
   const publicData = {
     alphabet,
@@ -383,14 +383,13 @@ function getHintsRequested (hints_requested) {
 }
 
 
-function grantHints (hintRequests) {
+function grantHints (hintRequests, clearText) {
   return hintRequests.map(function (hintRequest) {
     let symbol;
     let {cellRank, type} = hintRequest;
-    console.log('hintRequest :', hintRequest);
 
     if (type === "type_1") {
-      symbol = symbolAlphabet.includes(cellRank) ? alphabet[symbolAlphabet.indexOf(cellRank)] : " ";
+      symbol = clearText[cellRank];
     } else if (type === "type_2") {
       return {cellRank, symbol: '', key: symbolAlphabet, type};
     }

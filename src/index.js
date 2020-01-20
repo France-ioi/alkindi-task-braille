@@ -76,14 +76,24 @@ function taskInitReducer (state, _action) {
 }
 
 function taskRefreshReducer (state, _action) {
- return state;
+  return state;
 }
 
 function getTaskAnswer (state) {
-  const {taskData: {alphabet}, permutationText, xorText, andText} = state;
+  const {taskData: {alphabet}, decipheredText, permutationText, xorText, andText, } = state;
+
+  let decipheredLetters = {};
+  Object.keys(decipheredText.decipheredLetters)
+    .forEach(key => {
+      const {charAt, isHint} = decipheredText.decipheredLetters[key];
+      if (charAt !== null && (isHint === undefined || !isHint)) {
+        decipheredLetters[key] = {charAt};
+      }
+    });
+
   return {
     substitutions: state.substitutions.cells
-    .reduce((arr, {editable}, index) => {
+      .reduce((arr, {editable}, index) => {
         const rank = alphabet.indexOf(editable);
         if (rank !== -1) {
           arr.push([index, rank]);
@@ -92,19 +102,21 @@ function getTaskAnswer (state) {
       }, []),
     permutation: permutationText.dump,
     xor: xorText.dump,
-    and: andText.dump
+    and: andText.dump,
+    decipheredLetters,
   };
 }
 
 function taskAnswerLoaded (state, {payload: {answer}}) {
   const {alphabet, hints} = state.taskData;
-  const {substitutions: subs, permutation, xor, and} = answer;
+  const {substitutions: subs, permutation, xor, and, decipheredLetters} = answer;
   const substitutions = loadSubstitutions(alphabet, hints, subs);
   return update(state, {
     substitutions: {$set: substitutions},
     permutationText: {dump: {$set: permutation}},
     xorText: {dump: {$set: xor}},
-    andText: {dump: {$set: and}}
+    andText: {dump: {$set: and}},
+    decipheredText: {decipheredLetters: {$set: decipheredLetters}}
   });
 }
 

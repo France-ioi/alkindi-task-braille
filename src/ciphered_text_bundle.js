@@ -1,7 +1,8 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {updateGridGeometry, updateGridVisibleRows, getClassNames} from './utils';
-import {BETWEEN_SYM_VT, BETWEEN_SYM_HZ} from './symbols_bundle';
+import {updateGridGeometry, updateGridVisibleRows} from './utils';
+import {symSpecV1} from './symbols_bundle';
+const  {BETWEEN_SYM_VT} = symSpecV1();
 
 
 function appInitReducer (state, _action) {
@@ -21,7 +22,7 @@ function taskInitReducer (state) {
     return state;
   }
   const {cipherSymbols} = state.taskData;
-  const {width, height} = state.symbols;
+  const {width, height} = state.symbols.sym3Normal;
   cipheredText = {
     ...cipheredText, cellWidth: width,
     cellHeight: height, cells: cipherSymbols, nbCells: cipherSymbols.length
@@ -61,7 +62,7 @@ function CipherTextViewSelector (state) {
   const {actions, cipheredText, symbols} = state;
   const {cipheredTextResized, cipheredTextScrolled} = actions;
   const {width, height, cellWidth, cellHeight, bottom, pageRows, pageColumns, visible, scrollTop} = cipheredText;
-  const {cells} = symbols;
+  const {cells} = symbols.sym3Normal;
   return {
     cipheredTextResized, cipheredTextScrolled,
     width, height, visibleRows: visible.rows, cellWidth, cellHeight, bottom, pageRows, pageColumns, scrollTop,
@@ -109,7 +110,7 @@ class CipherTextView extends React.PureComponent {
                   padding: '4px'
                 }}>
                 {columns.map(({index, cell}) =>
-                  (<svg
+                  cell ? (<svg
                     key={index}
                     className={`_${cell[0]}a _${cell[1]}b _${cell[2]}c`}
                     width={cellWidth}
@@ -121,7 +122,12 @@ class CipherTextView extends React.PureComponent {
                       height: `${cellHeight}px`
                     }} >
                     {cells}
-                  </svg>)
+                  </svg>) : (<div key={index} style={{
+                      position: 'absolute',
+                      left: `${index * cellWidth + 1}px`,
+                      width: `${cellWidth}px`,
+                      height: `${cellHeight}px`
+                    }}></div>)
                 )}
               </div>)
             )}

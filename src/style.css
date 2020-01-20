@@ -15,12 +15,15 @@
   font-weight: 600;
 }
 
-
 .xor_wrapper .xor_tool {
   position: relative;
   width: 400px;
   height: 180px;
   float: left;
+}
+
+i.fa-unlock-alt {
+  color: #6F6F6F;
 }
 
 .triangle {
@@ -29,7 +32,7 @@
   height: 0;
   border-left: 12px solid transparent;
   border-right: 12px solid transparent;
-  border-bottom: 20px solid #2f2f2f;
+  border-bottom: 20px solid #6f6f6f;
 }
 
 .perm_line h4 {
@@ -43,7 +46,7 @@
 
 .perm_line .dd_cell:nth-child(3),
 .perm_line .dd_cell:nth-child(6) {
-  margin-right: 50px;
+  margin-right: 40px;
 }
 
 .perm_line.line2 {
@@ -57,17 +60,34 @@
 .perm_line.line2 .lock {
   padding: 6px;
   cursor: pointer;
+  position: relative;
+  top: -12px;
 }
 
 .perm_wrapper .perm_cells {
   display: inline;
 }
 
+.drop {
+  position: relative;
+  width: 47px;
+  height: 60px;
+  /* background-color: #fb6161; */
+  padding-top: 12px;
+
+}
+
 .dd_cell {
   display: inline-block;
   text-align: center;
-  width: 27px;
-  margin: 0 10px;
+  width: 47px;
+  margin: 0 0;
+}
+
+.perm_line.line2 .dd_cell {
+  position: relative;
+  top: -12px;
+  /* background-color: #f7a13f; */
 }
 
 .dd_txt {
@@ -76,9 +96,11 @@
   border: 1px solid #000;
   border-radius: 4px;
   background-color: #efefef;
+  width: 27px;
+  margin: auto;
 }
 
-.dd_cell-draggable:hover {
+.dd_cell-draggable:hover span {
   background: #ccc;
 }
 

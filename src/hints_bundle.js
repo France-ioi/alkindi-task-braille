@@ -69,15 +69,13 @@ function HintSelector (state) {
     const {hints} = state.taskData;
     const {
         actions: {requestHint, hintRequestFeedbackCleared, decipheredCellEditCancelled},
-        hintRequest, substitutions, editingDecipher,
+        hintRequest, editingDecipher,
     } = state;
     let hintRequestData = null;
-    const {cells} = substitutions;
-    if (typeof editingDecipher.symbol === 'number') {
-        const editingCell = cells[editingDecipher.symbol];
-        if (!editingCell.hint && !editingCell.locked) {
-            hintRequestData = {cellRank: editingDecipher.symbol};
-        }
+    if (typeof editingDecipher.cellRank === 'number'
+        && editingDecipher.cellRank !== -1
+    ) {
+        hintRequestData = {cellRank: editingDecipher.cellRank};
     }
     const isAllHint = (hints.length > 0 && (hints.map(({type}) => (type == 'type_2')).filter(bool => bool)).length !== 0) || false;
 

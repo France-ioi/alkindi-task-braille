@@ -1,25 +1,10 @@
 import React from 'react';
+import TriangleButtonGroup from './tools/triangle_btn_group';
+import SymbolsCircleAsBits from './tools/sym_circles_as_bits';
 import {connect} from 'react-redux';
-import {updateGridGeometry, updateGridVisibleRows, applyXOR} from './utils';
-import {BETWEEN_DOTS, BETWEEN_SYM_VT, BETWEEN_SYM_HZ, RADIUS} from './symbols_bundle';
-
-const elements = [
-  [0, 0],
-  [0, 1],
-  [0, 2],
-  [1, 0],
-  [1, 1],
-  [1, 2],
-  [2, 0],
-  [2, 1],
-  [2, 2],
-];
-
-const colMasks = [
-  1 << 2 | 1 << 5 | 1 << 8 | 1 << 11, // 2340
-  1 << 1 | 1 << 4 | 1 << 7 | 1 << 10, // 1170
-  1 << 0 | 1 << 3 | 1 << 6 | 1 << 9  // 585
-];
+import {colMasks, updateGridGeometry, updateGridVisibleRows, applyXOR} from './utils';
+import {symSpecV1} from './symbols_bundle';
+const  {BETWEEN_SYM_VT} = symSpecV1();
 
 
 function appInitReducer (state, _action) {
@@ -43,7 +28,7 @@ function taskInitReducer (state) {
     return state;
   }
   const {cells} = state.permutationText;
-  const {width, height} = state.symbols;
+  const {width, height} = state.symbols.sym3Normal;
 
   xorText = {...xorText, cellWidth: width, cellHeight: height};
   xorText = applyRefreshedData(xorText, cells);
@@ -127,11 +112,11 @@ function XORViewSelector (state) {
   const {actions, xorText, symbols} = state;
   const {xorTextResized, xorTextScrolled, xorTextBitFlipped, xorTextColumnFlipped} = actions;
   const {dump: {xorMask}, width, height, cellWidth, cellHeight, bottom, pageRows, pageColumns, visible, scrollTop} = xorText;
-  const {cells} = symbols;
+  const {sym3Big, sym3Normal: {cells}} = symbols;
   return {
     xorTextResized, xorTextScrolled, xorTextBitFlipped, xorTextColumnFlipped,
     xorMask, width, height, visibleRows: visible.rows, cellWidth, cellHeight, bottom, pageRows, pageColumns, scrollTop,
-    cells
+    sym3Big, cells
   };
 }
 
@@ -159,50 +144,19 @@ const XORNoteText = () => (<div style={{height: 150}} className="xor_note">
   <p>A black dot means every dot in this position within a block of 3 symbols will be flipped in the text</p>
 </div>);
 
-class TriangleButtonGroup extends React.PureComponent {
-  render () {
-    const {onClick} = this.props;
-    const triangles = [];
-    let margin = 0;
-    for (let i = 0; i < 9; i++) {
-      triangles.push(<div key={i} onClick={onClick.bind(null, elements[i])} style={{marginLeft: margin}} className="triangle"></div>);
-      margin = (i === 2 || i === 5) ? Math.ceil(BETWEEN_SYM_HZ * 2) + 1 : BETWEEN_DOTS;
-    }
-    return (
-      <div style={{marginTop: 98}}>
-        {triangles}
-      </div>
-    );
-  }
-}
-
-class SymbolsCircleAsBits extends React.PureComponent {
-  render () {
-    const {cells, onBitClick} = this.props;
-    return cells.map(ele => React.cloneElement(ele, {
-      onClick: onBitClick.bind(null, ele.key.substr(1).split('_').map((v, i) => i === 1 ? 11 - parseInt(v) : parseInt(v))),
-      cy: ele.props.cy - BETWEEN_SYM_VT/2 + RADIUS + 1,
-      cx: ele.props.cx - BETWEEN_SYM_HZ/2 + RADIUS + 1,
-    }));
-  }
-}
-
 class XORTool extends React.PureComponent {
 
   render () {
-    const {xorMask, cells, onBitClick, onTriangleClick} = this.props;
+    const {xorMask, sym3Big, onBitClick, onTriangleClick} = this.props;
     return (
       <div className="xor_wrapper">
         <div className="xor_tool">
           <svg className={`_${xorMask[0]}a _${xorMask[1]}b _${xorMask[2]}c`}
-            transform="scale(3) translate(42.6, 16)"
-            style={{
-              width: (BETWEEN_DOTS*6) + (BETWEEN_SYM_HZ*2) + (RADIUS+1)*2,
-              height: (BETWEEN_DOTS*3) + (RADIUS+1)*2
-            }}
+            width={sym3Big.width}
+            height={sym3Big.height}
           >
             <SymbolsCircleAsBits
-              cells={cells}
+              cells={sym3Big.cells}
               onBitClick={onBitClick}
             />
           </svg>
@@ -217,11 +171,11 @@ class XORTool extends React.PureComponent {
 class XORView extends React.PureComponent {
 
   render () {
-    const {xorMask, width, height, pageColumns, visibleRows, cellWidth, cellHeight, bottom, cells} = this.props;
+    const {xorMask, width, height, pageColumns, visibleRows, cellWidth, cellHeight, bottom, cells, sym3Big} = this.props;
     return (
       <div>
         <XORTool
-          cells={cells}
+          sym3Big={sym3Big}
           xorMask={xorMask}
           onBitClick={this.onBitClick}
           onTriangleClick={this.onTriangleClick}
@@ -253,7 +207,7 @@ class XORView extends React.PureComponent {
                   padding: '4px'
                 }}>
                 {columns.map(({index, cell}) =>
-                  (<svg
+                  cell ? (<svg
                     key={index}
                     className={`_${cell[0]}a _${cell[1]}b _${cell[2]}c`}
                     width={cellWidth}
@@ -265,7 +219,12 @@ class XORView extends React.PureComponent {
                       height: `${cellHeight}px`
                     }} >
                     {cells}
-                  </svg>)
+                  </svg>)  : (<div key={index} style={{
+                      position: 'absolute',
+                      left: `${index * cellWidth + 1}px`,
+                      width: `${cellWidth}px`,
+                      height: `${cellHeight}px`
+                    }}></div>)
                 )}
               </div>)
             )}

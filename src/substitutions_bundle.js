@@ -13,7 +13,6 @@ function appInitReducer (state, _action) {
   return {...state, substitutions: {}, editing: {}};
 }
 
-
 function taskInitReducer (state, _action) {
   const {alphabet, hints} = state.taskData;
   const substitutions = loadSubstitutions(alphabet, hints, []);
@@ -90,7 +89,7 @@ function SubstitutionSelector (state) {
       substitutionCellEditCancelled, substitutionCellEditStarted, substitutionCellEditMoved
     },
     substitutions, editing,
-    symbols: {singleSymbol},
+    symbols: {sym1Small: singleSymbol},
     taskData: {alphabet},
     editingDecipher,
   } = state;
@@ -177,10 +176,9 @@ class SubstitutionCell extends React.PureComponent {
       backgroundColor: isHint ? '#afa' : (isConflict ? '#fcc' : '#fff')
     };
 
-    if (isHint && editableChar === ' ') {
-      editableCellStyle.backgroundColor = '#fcc';
-      editableChar = '✖';
-    }
+    // if (isHint && charAt && editableChar !== charAt) {
+    //   editableCellStyle.backgroundColor = '#fcc';
+    // }
 
     /* Apply active-status separation border style. */
     const bottomCellStyle = staticCellStyle;
@@ -197,7 +195,6 @@ class SubstitutionCell extends React.PureComponent {
           className={`_${staticChar}a`}
           width={singleSymbol.width}
           height={singleSymbol.height}
-          transform={`scale(0.5) translate(-14, -18)`}
         >
           {singleSymbol.cells}
         </svg>) || '\u00A0'}
