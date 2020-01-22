@@ -315,11 +315,7 @@ function generateTaskData (task) {
   const minLength = 2000;
   const clearText = generate(rng0, minLength, minLength + 50, false);
 
-  console.log('clearText :', clearText.substr(0, 12));
-
   const clearSymbols = textTo3Symbols(alphabet, clearText);
-
-  console.log('clearSymbols :', clearSymbols.slice(0, 12));
 
   const xorSymbols = addXor ? applyXORMask(clearSymbols) : clearSymbols;
 
