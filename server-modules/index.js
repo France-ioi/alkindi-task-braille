@@ -130,6 +130,11 @@ module.exports.gradeAnswer = function (args, task_data, callback) {
   for (let i = 0; i < evalLength; i += 1) {
     if (correctLetters.includes(evalClearText[i])) {
       correctChars += 1;
+    } else {
+      if (decipheredLetters[i] === undefined &&
+      decipheredLetters[i].charAt === evalClearText[i] ) {
+        correctChars += 1;
+      }
     }
   }
 
