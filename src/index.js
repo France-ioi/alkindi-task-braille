@@ -80,7 +80,7 @@ function taskRefreshReducer (state, _action) {
 }
 
 function getTaskAnswer (state) {
-  const {taskData: {alphabet}, decipheredText, permutationText, xorText, andText, } = state;
+  const {taskData: {alphabet}, decipheredText, permutationText, xorText, andText} = state;
 
   let decipheredLetters = {};
   Object.keys(decipheredText.decipheredLetters)

@@ -59,7 +59,7 @@ function taskRefreshReducer (state) {
   if (!andText) {
     return state;
   }
-  const {cells} = state.permutationText;
+  const {cells} = state.xorText;
   andText = applyRefreshedData(andText, cells);
   andText = updateGridGeometry(andText);
   andText = updateGridVisibleRows(andText);

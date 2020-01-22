@@ -9,7 +9,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import update from 'immutability-helper';
 
-import {updateGridGeometry, updateGridVisibleRows, applySubstitutions, getClassNames} from './utils';
+import {updateGridGeometry, updateGridVisibleRows, applySubstitutions} from './utils';
 
 
 function appInitReducer (state, _action) {

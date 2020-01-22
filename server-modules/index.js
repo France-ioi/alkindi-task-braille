@@ -9,32 +9,32 @@ var {shuffle} = require("shuffle");
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 const symbolAlphabet = [
-  2166,
-  773,
-  3161,
-  3058,
-  86,
-  1785,
-  300,
-  1603,
-  3467,
-  641,
-  1544,
-  3717,
-  1182,
-  1317,
-  3481,
-  1551,
-  2622,
-  415,
-  3642,
-  1366,
-  3203,
-  2181,
-  206,
-  3390,
-  1608,
-  718
+  2166, // A
+  773, // B
+  3161, // C
+  3058, // D
+  86, // E
+  1785, // F
+  300, // G
+  1603, // H
+  3467, // I
+  641, // J
+  1544, // K
+  3717, // L
+  1182, // M
+  1317, // N
+  3481, // O
+  1551, // P
+  2622, // Q
+  415, // R
+  3642, // S
+  1366, // T
+  3203, // U
+  2181, // V
+  206, // W
+  3390, // X
+  1608, // Y
+  718 // Z
 ];
 
 const XOR_MASK = [
@@ -104,7 +104,10 @@ module.exports.gradeAnswer = function (args, task_data, callback) {
     privateData: {clearText}
   } = generateTaskData(args.task);
 
-  const {substitutions} = JSON.parse(args.answer.value);
+  const {
+    substitutions,
+    decipheredLetters
+  } = JSON.parse(args.answer.value);
 
   const correctLetters = [];
   for (let i = 0; i < substitutions.length; i++) {
@@ -131,7 +134,7 @@ module.exports.gradeAnswer = function (args, task_data, callback) {
     if (correctLetters.includes(evalClearText[i])) {
       correctChars += 1;
     } else {
-      if (decipheredLetters[i] === undefined &&
+      if (decipheredLetters[i] !== undefined &&
       decipheredLetters[i].charAt === evalClearText[i] ) {
         correctChars += 1;
       }
@@ -187,81 +190,6 @@ function applyXORMask (clearSymbols) {
       return XOR_MASK[i] ^ sym;
     }));
 }
-
-// function applyPermutationold (data, permutation) {
-//   return data.map(item => {
-//     const flipped = [];
-//     for (let i = 0; i < elements.length; i++) {
-//       const el_str = elements[i].toString();
-//       const pr_str = permutation[i].toString();
-//       if (el_str === pr_str || flipped.includes(pr_str)) {
-//         continue;
-//       }
-//       flipped.push(el_str);
-
-//       const arr1 = item[elements[i][0]];
-//       const arr2 = item[permutation[i][0]];
-//       const colIndex1 = gridColumns[elements[i][1]];
-//       const colIndex2 = gridColumns[permutation[i][1]];
-//       for (let k = 0; k < colIndex1.length; k++) {
-//         [arr1[colIndex1[k]], arr2[colIndex2[k]]] = [arr2[colIndex2[k]], arr1[colIndex1[k]]];
-//       }
-//     }
-//     return item;
-//   });
-// }
-
-// function applyPermutation (data, permutation) {
-//   function bitSetOrNot (maskObj, bitVal, clearBit) {
-//     const type = (clearBit === 0) ? '-' : '+';
-//     maskObj[type].push(bitVal);
-//   }
-
-//   return data.map(item => {
-//     const flipped = [];
-//     const maskObjArr = item.map(_a => ({'+': [], '-': []}));
-//     const columnsBitValues = gridColumns.map(ar => ar.map(v => 1 << v));
-
-//     for (let i = 0; i < elements.length; i++) {
-//       const el_str = elements[i].toString();
-//       const pr_str = permutation[i].toString();
-//       if (el_str === pr_str || flipped.includes(pr_str)) {
-//         continue;
-//       }
-//       flipped.push(el_str);
-
-//       const ele_index = elements[i][0];
-//       const value1 = item[ele_index];
-//       const maskObj1 = maskObjArr[ele_index];
-
-//       const perm_index = permutation[i][0];
-//       const value2 = item[perm_index];
-//       const maskObj2 = maskObjArr[perm_index];
-
-//       const colIndex1 = columnsBitValues[elements[i][1]];
-//       const colIndex2 = columnsBitValues[permutation[i][1]];
-
-//       for (let k = 0; k < colIndex1.length; k++) {
-//         const v1ColIndexBit = colIndex1[k];
-//         const v2ColIndexBit = colIndex2[k];
-//         const bitVal2 = value2 & v2ColIndexBit;
-//         const bitVal1 = value1 & v1ColIndexBit;
-//         if (!(bitVal1 & bitVal2)) { // performance optmization, [1,1] = [1,1], no need to do that
-//           bitSetOrNot(maskObj1, v1ColIndexBit, bitVal2);
-//           bitSetOrNot(maskObj2, v2ColIndexBit, bitVal1);
-//         }
-//       }
-//     }
-
-//     return item.map((value, i) => {
-//       const maskObj = maskObjArr[i];
-//       const maskAdd = maskObj['+'].reduce((m, bit) => m | bit, 0);
-//       const maskRemove = maskObj['-'].reduce((m, bit) => m | bit, 0);
-//       return (value | maskAdd) & ~maskRemove;
-//     });
-//   });
-// }
-
 
 function applyPermutation (data, _elements, permutation) {
 
@@ -325,6 +253,8 @@ function generateTaskData (task) {
   const xorSymbols = addXor ? applyXORMask(clearSymbols) : clearSymbols;
 
   const permutation = generatePermutation(elements, rng0);
+
+  console.log('permutation :', permutation);
 
   const cipherSymbols = addPerm ? applyPermutation(xorSymbols, elements, permutation) : xorSymbols;
 
