@@ -1,6 +1,7 @@
 import React from 'react';
 import TriangleButtonGroup from './tools/triangle_btn_group';
 import SymbolsCircleAsBits from './tools/sym_circles_as_bits';
+import ColumnsSeparators from './tools/column_sepatators';
 import {connect} from 'react-redux';
 import {colMasks, updateGridGeometry, updateGridVisibleRows, applyAND} from './utils';
 import {symSpecV1} from './symbols_bundle';
@@ -28,7 +29,7 @@ function taskInitReducer (state) {
     return state;
   }
   // const {addAnd} = state.taskData.version;
-  const {cells} = state.permutationText;
+  const {cells} = state.xorText;
   const {width, height} = state.symbols.sym3Normal;
 
   // const dump = {
@@ -123,22 +124,6 @@ function ANDViewSelector (state) {
     andMask, width, height, visibleRows: visible.rows, cellWidth, cellHeight, bottom, pageRows, pageColumns, scrollTop,
     cells, sym3Big
   };
-}
-
-class ColumnsSeparators extends React.PureComponent {
-  render () {
-    const {pageColumns, cellWidth, bottom} = this.props;
-    const lines = [];
-    for (let i = 0; i < pageColumns - 1; i++) {
-      lines.push(<span key={i} style={{
-        position: 'absolute',
-        left: `${(i + 1) * cellWidth}px`,
-        height: `${bottom}px`,
-        borderLeft: '2px solid #000',
-      }}></span>);
-    }
-    return lines;
-  }
 }
 
 

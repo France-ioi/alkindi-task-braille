@@ -1,8 +1,9 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import ColumnsSeparators from './tools/column_sepatators';
 import {updateGridGeometry, updateGridVisibleRows} from './utils';
 import {symSpecV1} from './symbols_bundle';
-const  {BETWEEN_SYM_VT} = symSpecV1();
+const {BETWEEN_SYM_VT} = symSpecV1();
 
 
 function appInitReducer (state, _action) {
@@ -23,6 +24,7 @@ function taskInitReducer (state) {
   }
   const {cipherSymbols} = state.taskData;
   const {width, height} = state.symbols.sym3Normal;
+
   cipheredText = {
     ...cipheredText, cellWidth: width,
     cellHeight: height, cells: cipherSymbols, nbCells: cipherSymbols.length
@@ -59,21 +61,23 @@ function cipheredTextScrolledReducer (state, {payload: {scrollTop}}) {
 }
 
 function CipherTextViewSelector (state) {
-  const {actions, cipheredText, symbols} = state;
+  const {taskData: {version}, actions, cipheredText, symbols} = state;
   const {cipheredTextResized, cipheredTextScrolled} = actions;
   const {width, height, cellWidth, cellHeight, bottom, pageRows, pageColumns, visible, scrollTop} = cipheredText;
   const {cells} = symbols.sym3Normal;
+
   return {
     cipheredTextResized, cipheredTextScrolled,
     width, height, visibleRows: visible.rows, cellWidth, cellHeight, bottom, pageRows, pageColumns, scrollTop,
-    cells
+    cells, hideSeparators: version.version === 1
   };
 }
+
 
 class CipherTextView extends React.PureComponent {
 
   render () {
-    const {width, height, pageColumns, visibleRows, cellWidth, cellHeight, bottom, cells} = this.props;
+    const {width, height, hideSeparators, pageColumns, visibleRows, cellWidth, cellHeight, bottom, cells} = this.props;
     return (
       <div>
         <div
@@ -87,19 +91,11 @@ class CipherTextView extends React.PureComponent {
             border: '1px solid #000',
 
           }} >
-          {(function () {
-            const lines = [];
-            for (let i = 0; i < pageColumns-1; i++) {
-              lines.push(<span key={i} style={{
-                position: 'absolute',
-                left: `${(i+1) * cellWidth}px`,
-                height: `${bottom}px`,
-                borderLeft: '2px solid #000',
-              }}></span>);
-            }
-            return lines;
-          })()}
-
+          {!hideSeparators && <ColumnsSeparators
+            pageColumns={pageColumns}
+            cellWidth={cellWidth}
+            bottom={bottom}
+          />}
           {(visibleRows || [])
             .map(({index, columns}) =>
               (<div
@@ -123,11 +119,11 @@ class CipherTextView extends React.PureComponent {
                     }} >
                     {cells}
                   </svg>) : (<div key={index} style={{
-                      position: 'absolute',
-                      left: `${index * cellWidth + 1}px`,
-                      width: `${cellWidth}px`,
-                      height: `${cellHeight}px`
-                    }}></div>)
+                    position: 'absolute',
+                    left: `${index * cellWidth + 1}px`,
+                    width: `${cellWidth}px`,
+                    height: `${cellHeight}px`
+                  }}></div>)
                 )}
               </div>)
             )}

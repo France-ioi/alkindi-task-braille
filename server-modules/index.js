@@ -164,11 +164,11 @@ module.exports.gradeAnswer = function (args, task_data, callback) {
 
 function textTo3Symbols (alphabet, clearText) {
   const data = [];
-  for (let i = 0; i + 2 < clearText.length;) {
+  for (let i = 0; i + 3 < clearText.length; i = i + 3) {
     const item = [
-      symbolAlphabet[alphabet.indexOf(clearText[i++])],
-      symbolAlphabet[alphabet.indexOf(clearText[i++])],
-      symbolAlphabet[alphabet.indexOf(clearText[i++])]
+      symbolAlphabet[alphabet.indexOf(clearText[i])],
+      symbolAlphabet[alphabet.indexOf(clearText[i+1])],
+      symbolAlphabet[alphabet.indexOf(clearText[i+2])]
     ];
     data.push(item);
   }
@@ -301,9 +301,9 @@ function applyPermutation (data, _elements, permutation) {
 
 const versions = [
   [],
-  {addPerm: false, addXor: false, addAnd: false},
-  {addPerm: true, addXor: false, addAnd: true},
-  {addPerm: true, addXor: true, addAnd: true}
+  {version: 1, addPerm: false, addXor: false, addAnd: false},
+  {version: 2, addPerm: true, addXor: false, addAnd: true},
+  {version: 3, addPerm: true, addXor: true, addAnd: true}
 ];
 
 // module.exports.generateTaskData =
@@ -315,7 +315,11 @@ function generateTaskData (task) {
   const minLength = 2000;
   const clearText = generate(rng0, minLength, minLength + 50, false);
 
+  console.log('clearText :', clearText.substr(0, 12));
+
   const clearSymbols = textTo3Symbols(alphabet, clearText);
+
+  console.log('clearSymbols :', clearSymbols.slice(0, 12));
 
   const xorSymbols = addXor ? applyXORMask(clearSymbols) : clearSymbols;
 

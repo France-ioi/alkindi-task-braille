@@ -1,6 +1,7 @@
 import React from 'react';
 import classnames from 'classnames';
 import {connect} from 'react-redux';
+import ColumnsSeparators from './tools/column_sepatators';
 import {elements, updateGridGeometry, updateGridVisibleRows, applyPermutation} from './utils';
 import HTML5Backend from "react-dnd-html5-backend";
 import {DndProvider, DragSource, DropTarget} from "react-dnd";
@@ -279,21 +280,7 @@ class LinesSvg extends React.PureComponent {
   }
 }
 
-class ColumnsSeparators extends React.PureComponent {
-  render () {
-    const {pageColumns, cellWidth, bottom} = this.props;
-    const lines = [];
-    for (let i = 0; i < pageColumns - 1; i++) {
-      lines.push(<span key={i} style={{
-        position: 'absolute',
-        left: `${(i + 1) * cellWidth}px`,
-        height: `${bottom}px`,
-        borderLeft: '2px solid #000',
-      }}></span>);
-    }
-    return lines;
-  }
-}
+
 class SymColLocksHighlighter extends React.PureComponent {
   render () {
     const {permCells, pageColumns, cellWidth, bottom} = this.props;

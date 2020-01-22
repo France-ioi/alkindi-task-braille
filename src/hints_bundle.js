@@ -58,8 +58,10 @@ class Hint2View extends React.PureComponent {
         );
     }
     requestHint = () => {
-        const {dispatch, requestHint} = this.props;
+        const {dispatch, requestHint, decipheredCellEditCancelled} = this.props;
         dispatch({type: requestHint, payload: {request: {type: "type_2"}}});
+        dispatch({type: decipheredCellEditCancelled});
+
     };
 }
 
@@ -70,12 +72,19 @@ function HintSelector (state) {
     const {
         actions: {requestHint, hintRequestFeedbackCleared, decipheredCellEditCancelled},
         hintRequest, editingDecipher,
+        substitutions: {cells: substitutionCells},
+        decipheredText: {decipheredLetters}
     } = state;
     let hintRequestData = null;
-    if (typeof editingDecipher.cellRank === 'number'
-        && editingDecipher.cellRank !== -1
-    ) {
-        hintRequestData = {cellRank: editingDecipher.cellRank};
+    if (typeof editingDecipher.cellRank === 'number') {
+        const isHint =
+        decipheredLetters[editingDecipher.cellRank] &&
+        decipheredLetters[editingDecipher.cellRank].isHint !== undefined;
+
+        const {locked} = substitutionCells[editingDecipher.symbol];
+        if (!isHint && !locked) {
+            hintRequestData = {cellRank: editingDecipher.cellRank};
+        }
     }
     const isAllHint = (hints.length > 0 && (hints.map(({type}) => (type == 'type_2')).filter(bool => bool)).length !== 0) || false;
 

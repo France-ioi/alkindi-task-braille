@@ -86,6 +86,7 @@ function SubstitutionSelector (state) {
   const {
     actions: {
       substitutionCellLockChanged, substitutionCellCharChanged,
+      decipheredCellEditCancelled,
       substitutionCellEditCancelled, substitutionCellEditStarted, substitutionCellEditMoved
     },
     substitutions, editing,
@@ -97,6 +98,7 @@ function SubstitutionSelector (state) {
   return {
     substitutionCellEditStarted, substitutionCellEditCancelled, substitutionCellEditMoved,
     substitutionCellLockChanged, substitutionCellCharChanged,
+    decipheredCellEditCancelled,
     editingDecipher, cells, nbCells: alphabet.length, selectedAlphabet, singleSymbol, editingRank: editing.cellRank
   };
 }
@@ -133,6 +135,7 @@ class SubstitutionView extends React.PureComponent {
   }
   onEditingStarted = (rank) => {
     this.props.dispatch({type: this.props.substitutionCellEditStarted, payload: {cellRank: rank}});
+    this.props.dispatch({type: this.props.decipheredCellEditCancelled});
   };
   onEditingCancelled = () => {
     this.props.dispatch({type: this.props.substitutionCellEditCancelled});

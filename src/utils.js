@@ -2,7 +2,7 @@ import React from 'react';
 import update from 'immutability-helper';
 import {range} from 'range';
 import {symSpecV1 as symSpecV1Fn} from './symbols_bundle';
-const symSpecV1  = symSpecV1Fn();
+const symSpecV1 = symSpecV1Fn();
 
 
 const size = 4096;
@@ -105,11 +105,9 @@ export function applyAND (newData, andMask) {
   const out = [];
   for (let i = 0; i < newData.length; i++) {
     const item = [];
-    for (let pos = 0; pos < andMask.length; pos++) {
-        item.push(newData[i][0] & andMask[0]);
-        item.push(newData[i][1] & andMask[1]);
-        item.push(newData[i][2] & andMask[2]);
-    }
+    item.push(newData[i][0] & andMask[0]);
+    item.push(newData[i][1] & andMask[1]);
+    item.push(newData[i][2] & andMask[2]);
     out.push(item);
   }
   return out;
@@ -258,7 +256,7 @@ export function sortedArrayHasElement (a, x) {
   return a[i] === x;
 }
 
-export function updateGridGeometry (grid, initScroll=symSpecV1.BETWEEN_SYM_VT / 2 - 5) {
+export function updateGridGeometry (grid, initScroll = symSpecV1.BETWEEN_SYM_VT / 2 - 5) {
   const {width, cellWidth, cellHeight, scrollTop, nbCells} = grid;
   const scrollBarWidth = 20;
   const pageColumns = Math.max(5, Math.floor((width - scrollBarWidth) / cellWidth));
@@ -268,10 +266,12 @@ export function updateGridGeometry (grid, initScroll=symSpecV1.BETWEEN_SYM_VT / 
   const bottom = Math.ceil(nbCells / pageColumns) * cellHeight - 1;
   const maxTop = Math.max(0, bottom + 1 - pageRows * cellHeight);
 
-  return {...grid, width: newWidth, height, pageColumns,
-     pageRows, scrollTop: Math.min(maxTop - initScroll,
+  return {
+    ...grid, width: newWidth, height, pageColumns,
+    pageRows, scrollTop: Math.min(maxTop - initScroll,
       Math.max(initScroll, scrollTop)),
-      bottom, maxTop};
+    bottom, maxTop
+  };
 }
 
 export function updateGridVisibleRows (grid, options) {

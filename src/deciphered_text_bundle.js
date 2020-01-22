@@ -52,11 +52,11 @@ function taskRefreshReducer (state) {
   const allHints = hints.filter(hint => hint.type === 'type_2');
 
   allHints.forEach(({clearText}) => {
-    for (let i=0; i<clearText.length; i++) {
-        hintsData[i] = {
-          charAt: clearText[i],
-          isHint: true,
-        };
+    for (let i = 0; i < clearText.length; i++) {
+      hintsData[i] = {
+        charAt: clearText[i],
+        isHint: true,
+      };
     }
   });
 
@@ -204,13 +204,14 @@ class DecipheredTextView extends React.PureComponent {
     symbol = symbol.toUpperCase();
     this.props.dispatch({type: this.props.decipheredCellCharChanged, payload: {position: rank, symbol}});
   };
+
 }
 
 class TextCell extends React.PureComponent {
   render () {
     let {editingDecipher, position, singleSymbol, column,
       charAt, ciphered, clear, isHint, locked,
-      cellWidth, cellHeight, colorClass, borderClass} = this.props;
+      cellWidth, cellHeight} = this.props;
     const isEmptyCell = ciphered === undefined;
 
     const cellStyle = {
@@ -228,11 +229,14 @@ class TextCell extends React.PureComponent {
       borderRight: '1px solid #eee',
       textAlign: 'center',
       cursor: 'text',
-      backgroundColor: (isHint || locked) ? ((locked) ? '#e2e2e2' : (isConflict ? '#fcc' : '#a2a2a2')) : '#fff'
+      backgroundColor: (isHint || locked) ? ((!isHint) ? '#e2e2e2' : (isConflict ? '#fcc' : '#a2a2a2')) : '#fff'
     };
+
+    const inputStyle = {width: '20px', height: '20px', textAlign: 'center'};
 
     if (isConflict) {
       editableCellStyle.backgroundColor = '#fcc';
+      inputStyle.backgroundColor = '#fcc';
     }
 
     const symbolCellStyle = {
@@ -246,14 +250,21 @@ class TextCell extends React.PureComponent {
     let isEditing = false;
     if ("cellRank" in editingDecipher) {
       isEditing = editingDecipher.cellRank === position;
+      if (isEditing) {
+        cellStyle.border = '2px solid #000';
+        delete cellStyle.borderWidth;
+      }
+      isEditing = isEditing && !isHint && (!locked || clear !== charAt);
+
     }
 
     const editableCell = (
       <div style={editableCellStyle}
-        onClick={!isEmptyCell ? this.startEditing : undefined}>
+      // onClick={!isEmptyCell ? this.startEditing : undefined}
+      >
         {isEditing
           ? <input ref={this.refInput} onChange={this.cellChanged} onKeyDown={this.keyDown}
-            type='text' value={charAt || clear || ''} style={{width: '20px', height: '20px', textAlign: 'center'}} />
+            type='text' value={charAt || clear || ''} style={inputStyle} />
           : (charAt || clear || '\u00A0')}
       </div>
     );
@@ -264,12 +275,9 @@ class TextCell extends React.PureComponent {
     }
 
     return (
-      <div className={`${getClassNames(colorClass, borderClass)}`} style={cellStyle}>
-        <div className="deciperdSym" style={symbolCellStyle}>
+      <div onClick={this.startEditing} style={cellStyle}>
+        <div style={symbolCellStyle}>
           <div
-
-            onMouseDown={!isEmptyCell ? this.startHighlighting : undefined}
-            onMouseUp={!isEmptyCell ? this.endEditing : undefined}
             style={{
               width: `17px`,
               height: `23px`,
@@ -310,14 +318,18 @@ class TextCell extends React.PureComponent {
     this.props.onEditingCancelled();
   };
   startEditing = () => {
-    const {isHint, locked, isEditing, position, clear, charAt, ciphered} = this.props;
-    if (!isHint && (!locked || clear !== charAt) && !isEditing) {
+    const {isHint, locked, position, editingDecipher, /*clear, charAt,*/ ciphered} = this.props;
+    if (ciphered === undefined) return;
+    if ((isHint || locked) && editingDecipher.cellRank !== undefined && editingDecipher.cellRank === position) {
+      this.endEditing();
+    } else {
       this.props.onEditingStarted(position, ciphered);
     }
   };
-  startHighlighting = () => {
-      this.props.onEditingStarted(-1, this.props.ciphered);
-  };
+  // startHighlighting = () => {
+  //   const {position, ciphered} = this.props;
+  //   this.props.onEditingStarted(-1, position, ciphered);
+  // };
   cellChanged = () => {
     const value = this._input.value.substr(-1); /* /!\ IE compatibility */
     this.props.onChangeChar(this.props.position, value);
