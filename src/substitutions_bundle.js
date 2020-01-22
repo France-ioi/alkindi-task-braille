@@ -14,15 +14,17 @@ function appInitReducer (state, _action) {
 }
 
 function taskInitReducer (state, _action) {
-  const {alphabet, hints} = state.taskData;
-  const substitutions = loadSubstitutions(alphabet, hints, []);
+  const {alphabet} = state.taskData;
+  const selectedAlphabet = state.frequencyAnalysis.textFrequencies;
+  const  substitutions = loadSubstitutions(alphabet, selectedAlphabet,  []);
   return {...state, substitutions, taskReady: true};
 }
 
 function taskRefreshReducer (state, _action) {
-  const {alphabet, hints} = state.taskData;
+  const {alphabet} = state.taskData;
   const dump = dumpSubstitutions(alphabet, state.substitutions);
-  const substitutions = loadSubstitutions(alphabet, hints, dump);
+  const selectedAlphabet = state.frequencyAnalysis.textFrequencies;
+  const substitutions = loadSubstitutions(alphabet, selectedAlphabet, dump);
   return {...state, substitutions};
 }
 
@@ -55,7 +57,7 @@ function substitutionCellCharChangedReducer (state, {payload: {rank, symbol}}) {
   if (symbol.length !== 1 || -1 === alphabet.indexOf(symbol)) {
     symbol = null;
   }
-  const substitution = editSubstitutionCell(substitutions, rank, symbol);
+  const substitution = editSubstitutionCell(alphabet, substitutions, rank, symbol);
   return update(state, {substitutions: {$set: substitution}});
 }
 

@@ -357,7 +357,7 @@ export function dumpSubstitutions (alphabet, substitution) {
   }, []);
 }
 
-export function loadSubstitutions (alphabet, hints, substitutionDump) {
+export function loadSubstitutions (alphabet, selectedAlphabet, substitutionDump) {
   const cells = new Array(size).fill(-1);
   for (let i = 0; i < substitutionDump.length; i++) {
     const [index, cell] = substitutionDump[i];
@@ -374,24 +374,27 @@ export function loadSubstitutions (alphabet, hints, substitutionDump) {
     };
   });
   let substitution = makeSubstitution(alphabet);
+  substitution = {...substitution, selectedAlphabet};
   substitution = update(substitution, {cells: $cells});
-  substitution = markSubstitutionConflicts(updatePerms(substitution));
+  substitution = markSubstitutionConflicts(alphabet, updatePerms(substitution));
   return substitution;
 }
 
-export function editSubstitutionCell (substitution, rank, symbol) {
+export function editSubstitutionCell (alphabet, substitution, rank, symbol) {
   substitution = update(substitution, {cells: {[rank]: {editable: {$set: symbol}}}});
-  return updatePerms(markSubstitutionConflicts(substitution));
+  return updatePerms(markSubstitutionConflicts(alphabet, substitution));
 }
 
 export function lockSubstitutionCell (substitution, rank, locked) {
   return update(substitution, {cells: {[rank]: {locked: {$set: locked}}}});
 }
 
-function markSubstitutionConflicts (substitution) {
+function markSubstitutionConflicts (alphabet, substitution) {
+  const {cells, selectedAlphabet} = substitution;
   const counts = new Map();
   const changes = {};
-  for (let {rank, editable, conflict} of substitution.cells) {
+  for (let i = 0; i < alphabet.length; i++) {
+    let {rank, editable, conflict} = cells[selectedAlphabet[i].symbol];
     if (conflict) {
       changes[rank] = {conflict: {$set: false}};
     }
@@ -417,7 +420,7 @@ export function updatePerms (substitution) {
   const {size, alphabet, cells} = substitution;
   const backward = new Array(size).fill(-1);
   for (let cell of cells) {
-    if (cell.editable !== null && !cell.conflict) {
+    if (cell.editable !== null /*&& !cell.conflict*/) {
       const source = alphabet.indexOf(cell.editable);
       backward[cell.rank] = source;
     }
