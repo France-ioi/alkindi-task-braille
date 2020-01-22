@@ -16,7 +16,7 @@ function appInitReducer (state, _action) {
       nbCells: 0,
       xorCells: null,
       dump: {
-        andMask: [0, 0, 0]
+        andMask: [4095, 4095, 4095]
       },
     }
   };
@@ -27,16 +27,16 @@ function taskInitReducer (state) {
   if (!andText) {
     return state;
   }
-  const {addAnd} = state.taskData.version;
+  // const {addAnd} = state.taskData.version;
   const {cells} = state.permutationText;
   const {width, height} = state.symbols.sym3Normal;
 
-  const dump = {
-    andMask: (addAnd) ?  [0, 0, 0] : [4095, 4095, 4095]
-  };
+  // const dump = {
+  //   andMask: (addAnd) ?  [0, 0, 0] : [4095, 4095, 4095]
+  // };
   andText = applyRefreshedData(andText, cells);
   andText = {
-    ...andText, cellWidth: width, dump,
+    ...andText, cellWidth: width, /*dump,*/
     cellHeight: height
   };
   andText = updateGridVisibleRows(andText);

@@ -346,7 +346,6 @@ function generateTaskData (task) {
     permutation,
     clearText
   };
-  console.log('permutation :', permutation);
 
   return {publicData, privateData};
 }
@@ -391,7 +390,7 @@ function grantHints (hintRequests, clearText) {
     if (type === "type_1") {
       symbol = clearText[cellRank];
     } else if (type === "type_2") {
-      return {cellRank, symbol: '', key: symbolAlphabet, type};
+      return {cellRank, symbol: '', clearText: clearText, type};
     }
     return {cellRank, symbol, type};
   });

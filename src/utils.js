@@ -358,7 +358,6 @@ export function dumpSubstitutions (alphabet, substitution) {
 }
 
 export function loadSubstitutions (alphabet, hints, substitutionDump) {
-  const allHints = hints.filter(hint => hint.type === 'type_2');
   const cells = new Array(size).fill(-1);
   for (let i = 0; i < substitutionDump.length; i++) {
     const [index, cell] = substitutionDump[i];
@@ -373,14 +372,6 @@ export function loadSubstitutions (alphabet, hints, substitutionDump) {
       editable: {$set: rank === -1 ? null : alphabet[rank]},
       locked: {$set: locked !== 0},
     };
-  });
-  allHints.forEach(({key}) => {
-    key.forEach((j, rank) => {
-      $cells[j] = {
-        editable: {$set: alphabet[rank]},
-        hint: {$set: true},
-      };
-    });
   });
   let substitution = makeSubstitution(alphabet);
   substitution = update(substitution, {cells: $cells});

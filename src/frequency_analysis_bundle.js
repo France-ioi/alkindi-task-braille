@@ -72,8 +72,8 @@ function frequencyAnalysisLateReducer (state) {
       const freqMap = new Map(alphabet);
       countSymbols(freqMap, cells, 0, cells.length - 1);
       textFrequencies = normalizeAndSortFrequencies(freqMap.entries());
-      const totalChars = Array.from(freqMap.values()).reduce((a, count) => count ? a+1 : a, 0);
-      const frequencyCount = textFrequencies.slice(0, referenceFrequencies.length).reduce((a, x) => x.proba ? a+1 : a, 0);
+      const totalChars = Array.from(freqMap.values()).reduce((a, count) => count ? a + 1 : a, 0);
+      const frequencyCount = textFrequencies.slice(0, referenceFrequencies.length).reduce((a, x) => x.proba ? a + 1 : a, 0);
       frequencyChanged = true;
       frequencyAnalysis = {...frequencyAnalysis, cells, andTextCells, textFrequencies, totalChars, frequencyCount};
     }
@@ -128,9 +128,10 @@ function normalizeAndSortFrequencies (entries) {
 }
 
 function FrequencyAnalysisSelector (state) {
-  const {frequencyAnalysis: {textFrequencies, visibleLetters, totalChars, frequencyCount}, symbols: {sym1Small: singleSymbol}} = state;
+  const {editingDecipher, frequencyAnalysis: {textFrequencies, visibleLetters, totalChars, frequencyCount}, symbols: {sym1Small: singleSymbol}} = state;
   const scale = 30 / referenceFrequencies.reduce((a, x) => Math.max(a, x.proba), 0);
   return {
+    editingDecipher,
     singleSymbol,
     referenceFrequencies,
     visibleLetters,
@@ -147,12 +148,12 @@ const numberStyle = {
 
 class FrequencyAnalysisView extends React.PureComponent {
   render () {
-    const {singleSymbol, visibleLetters, totalChars, frequencyCount, referenceFrequencies, textFrequencies, scale} = this.props;
+    const {editingDecipher, singleSymbol, visibleLetters, totalChars, frequencyCount, referenceFrequencies, textFrequencies, scale} = this.props;
     if (!referenceFrequencies) return false;
 
     return (
       <div className='clearfix'>
-        <h6><b>&nbsp;&nbsp;&nbsp;&nbsp;Frequencies of the <i style={numberStyle}>{frequencyCount}</i> most frequent symbols, out of { <i style={numberStyle}>{totalChars}</i>} present in the message after applying the AND tool.</b></h6>
+        <h6><b>&nbsp;&nbsp;&nbsp;&nbsp;Frequencies of the <i style={numberStyle}>{frequencyCount}</i> most frequent symbols, out of {<i style={numberStyle}>{totalChars}</i>} present in the message after applying the AND tool.</b></h6>
         <div style={{float: 'left', width: '100px', height: '108px', fontSize: '10px', lineHeight: '10px', position: 'relative'}}>
           <div style={{height: '30px', position: 'absolute', top: '6px'}}>
             {"Fréquences dans le texte :"}
@@ -169,7 +170,7 @@ class FrequencyAnalysisView extends React.PureComponent {
         </div>
         {range(0, frequencyCount).map(index =>
           <div key={index} style={{marginRight: '4px', float: 'left', width: '20px', height: '108px', position: 'relative'}}>
-            <TextFrequencyBox index={index} singleSymbol={singleSymbol} cell={textFrequencies[index]} scale={scale} />
+            <TextFrequencyBox index={index} editingDecipher={editingDecipher} singleSymbol={singleSymbol} cell={textFrequencies[index]} scale={scale} />
             <ReferenceFrequencyBox index={index} visibleLetters={visibleLetters} cell={referenceFrequencies[index]} scale={scale} />
           </div>)}
       </div>
@@ -179,10 +180,20 @@ class FrequencyAnalysisView extends React.PureComponent {
 
 class TextFrequencyBox extends React.PureComponent {
   render () {
-    const {cell, scale, singleSymbol} = this.props;
+    const {cell, scale, singleSymbol, editingDecipher} = this.props;
     if (!cell) return false;
+
+    const highlighted = editingDecipher.symbol && editingDecipher.symbol === cell.symbol;
+
+    const svgStyle = {};
+
+    if (highlighted) {
+        svgStyle.backgroundColor = "#9c9c9c";
+        svgStyle.outline = '3px solid #9c9c9c';
+    }
+
     return (
-      <div style={{position: 'absolute', top: '0px'}}>
+      <div style={ {position: 'absolute', top: '0px'}}>
         <div style={{width: '20px', height: '30px', display: 'table-cell', verticalAlign: 'bottom'}}>
           <div style={{height: `${Math.min(30, Math.round(cell.proba * scale))}px`, width: '8px', marginLeft: '5px', background: 'black'}} />
         </div>
@@ -191,6 +202,7 @@ class TextFrequencyBox extends React.PureComponent {
             className={`_${cell.symbol}a`}
             width={singleSymbol.width}
             height={singleSymbol.height}
+            style={svgStyle}
           >
             {singleSymbol.cells}
           </svg>

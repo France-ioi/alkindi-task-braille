@@ -41,11 +41,22 @@ function taskRefreshReducer (state) {
 
   const hintsData = {};
   hints.forEach(({cellRank: j, symbol, type}) => {
-    if (type !== 'type_2') {
+    if (type === 'type_1') {
       hintsData[j] = {
         charAt: symbol,
         isHint: true,
       };
+    }
+  });
+
+  const allHints = hints.filter(hint => hint.type === 'type_2');
+
+  allHints.forEach(({clearText}) => {
+    for (let i=0; i<clearText.length; i++) {
+        hintsData[i] = {
+          charAt: clearText[i],
+          isHint: true,
+        };
     }
   });
 
@@ -220,7 +231,7 @@ class TextCell extends React.PureComponent {
       backgroundColor: (isHint || locked) ? ((locked) ? '#e2e2e2' : (isConflict ? '#fcc' : '#a2a2a2')) : '#fff'
     };
 
-    if (!isHint && isConflict) {
+    if (isConflict) {
       editableCellStyle.backgroundColor = '#fcc';
     }
 
@@ -254,8 +265,9 @@ class TextCell extends React.PureComponent {
 
     return (
       <div className={`${getClassNames(colorClass, borderClass)}`} style={cellStyle}>
-        <div style={symbolCellStyle}>
+        <div className="deciperdSym" style={symbolCellStyle}>
           <div
+
             onMouseDown={!isEmptyCell ? this.startHighlighting : undefined}
             onMouseUp={!isEmptyCell ? this.endEditing : undefined}
             style={{
@@ -298,13 +310,9 @@ class TextCell extends React.PureComponent {
     this.props.onEditingCancelled();
   };
   startEditing = () => {
-    const {isHint, locked, isEditing, position, ciphered} = this.props;
-    if (!isHint && !locked && !isEditing) {
+    const {isHint, locked, isEditing, position, clear, charAt, ciphered} = this.props;
+    if (!isHint && (!locked || clear !== charAt) && !isEditing) {
       this.props.onEditingStarted(position, ciphered);
-    } else {
-      if (isHint || locked && !isEditing) {
-        this.props.onEditingStarted(-1, ciphered);
-      }
     }
   };
   startHighlighting = () => {

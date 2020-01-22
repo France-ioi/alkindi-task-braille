@@ -1,3 +1,7 @@
+.deciperdSym:active {
+  outline: 2px solid black;
+}
+
 .perm_wrapper,
 .xor_wrapper {
   position: relative;
