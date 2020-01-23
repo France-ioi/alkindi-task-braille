@@ -55,7 +55,7 @@ function applyRefreshedData (permutationText) {
       perm.push(elements[target.rank]);
     }
   }
-  cells = applyPermutation(cells, ele, perm);
+  cells = applyPermutation(cells, perm.reverse(), ele.reverse());
   permCells = [...permCells];
   return {...permutationText, cells, permCells};
 }
@@ -92,22 +92,19 @@ function permutationTextScrolledReducer (state, {payload: {scrollTop}}) {
 
 function permutationTextSwapPairsReducer (state, action) {
   let {permutationText} = state;
-  // const {cipherSymbols} = state.taskData;
+
   let {editedPairs} = permutationText.dump;
   // drag-drop elements
-  let {permCells} = permutationText;
   const {key1, value1, key2, value2} = action;
   if (key1 !== key2) {
     const target1 = {...editedPairs[key2], rank: value1};
     const target2 = {...editedPairs[key1], rank: value2};
-    permCells[key1] = target1;
-    permCells[key2] = target2;
     editedPairs = {...editedPairs, [key1]: target1, [key2]: target2};
     permutationText.dump = {editedPairs};
-    permutationText.cells =
-      applyPermutation(permutationText.cells, [elements[key1]], [elements[key2]]);
+    const {cipherSymbols} = state.taskData;
+    permutationText = {...permutationText, cells: [...cipherSymbols], nbCells: cipherSymbols.length};
+    permutationText = applyRefreshedData(permutationText);
 
-    permutationText.permCells = [...permCells];
     permutationText = updateGridVisibleRows(permutationText);
   }
 

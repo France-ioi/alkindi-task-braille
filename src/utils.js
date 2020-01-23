@@ -29,23 +29,29 @@ export const colMasks = [
 
 
 export function applyPermutation (data, elements, permutation) {
+  const permArr = [];
+  const flipped = [];
+  for (let i = 0; i < elements.length; i++) {
+    const el_str = elements[i].toString();
+    const pr_str = permutation[i].toString();
+    if (el_str === pr_str || flipped.includes(el_str+':'+pr_str)) {
+      continue;
+    }
+    flipped.push(pr_str+':'+el_str);
+    permArr.push({elements: elements[i], permutation: permutation[i]});
+  }
+
   return data.map(item => {
     item = [...item];
-    const flipped = [];
 
-    for (let i = 0; i < elements.length; i++) {
-      const el_str = elements[i].toString();
-      const pr_str = permutation[i].toString();
-      if (el_str === pr_str || flipped.includes(pr_str)) {
-        continue;
-      }
-      flipped.push(el_str);
+    for (let i = 0; i < permArr.length; i++) {
+      const {elements, permutation} = permArr[i];
 
       let from, to;
-      if (elements[i][1] < permutation[i][1]) { // to get the shift >> | << sign correcly
-        from = elements[i], to = permutation[i];
+      if (elements[1] < permutation[1]) { // to get the shift >> | << sign correcly
+        from = elements, to = permutation;
       } else {
-        to = elements[i], from = permutation[i];
+        to = elements, from = permutation;
       }
 
       const value1 = item[from[0]];

@@ -108,9 +108,10 @@ function getTaskAnswer (state) {
 }
 
 function taskAnswerLoaded (state, {payload: {answer}}) {
-  const {alphabet, hints} = state.taskData;
+  const {alphabet} = state.taskData;
   const {substitutions: subs, permutation, xor, and, decipheredLetters} = answer;
-  const substitutions = loadSubstitutions(alphabet, hints, subs);
+  const selectedAlphabet = state.frequencyAnalysis.textFrequencies;
+  const substitutions = loadSubstitutions(alphabet, selectedAlphabet, subs);
   return update(state, {
     substitutions: {$set: substitutions},
     permutationText: {dump: {$set: permutation}},

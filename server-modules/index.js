@@ -135,7 +135,7 @@ module.exports.gradeAnswer = function (args, task_data, callback) {
       correctChars += 1;
     } else {
       if (decipheredLetters[i] !== undefined &&
-      decipheredLetters[i].charAt === evalClearText[i] ) {
+        decipheredLetters[i].charAt === evalClearText[i]) {
         correctChars += 1;
       }
     }
@@ -175,8 +175,8 @@ function textTo3Symbols (alphabet, clearText) {
   for (let i = 0; i + 3 < clearText.length; i = i + 3) {
     const item = [
       symbolAlphabet[alphabet.indexOf(clearText[i])],
-      symbolAlphabet[alphabet.indexOf(clearText[i+1])],
-      symbolAlphabet[alphabet.indexOf(clearText[i+2])]
+      symbolAlphabet[alphabet.indexOf(clearText[i + 1])],
+      symbolAlphabet[alphabet.indexOf(clearText[i + 2])]
     ];
     data.push(item);
   }
@@ -192,23 +192,35 @@ function applyXORMask (clearSymbols) {
 }
 
 function applyPermutation (data, _elements, permutation) {
+  const filteredPerm = [];
+  const flipped = [];
+
+  for (let i = 0; i < permutation.length; i++) {
+    const el_str = _elements[i].toString();
+    const pr_str = permutation[i].toString();
+    if (el_str === pr_str || flipped.includes(el_str+':'+pr_str)) {
+      continue;
+    }
+    filteredPerm.push([_elements[i], permutation[i]]);
+    flipped.push(pr_str+':'+el_str);
+  }
 
   return data.map(item => {
-    const flipped = [];
 
-    for (let i = 0; i < _elements.length; i++) {
-      const el_str = _elements[i].toString();
-      const pr_str = permutation[i].toString();
-      if (el_str === pr_str || flipped.includes(pr_str)) {
-        continue;
-      }
-      flipped.push(el_str);
+    item = item.slice();
+
+    for (let i = 0; i < filteredPerm.length; i++) {
+
+      const [_elements, permutation] = filteredPerm[i];
 
       let from, to;
-      if (_elements[i][1] < permutation[i][1]) { // to get the shift >> | << sign correcly
-        from = _elements[i], to = permutation[i];
+      if (_elements[1] < permutation[1]) {
+        // to get the shift >> | << sign correcly
+        from = _elements;
+        to = permutation;
       } else {
-        to = _elements[i], from = permutation[i];
+        to = _elements;
+        from = permutation;
       }
 
       const value1 = item[from[0]];
@@ -244,6 +256,7 @@ function generateTaskData (task) {
   const version = parseInt(task.params.version) || 1;
   const {addPerm, addXor} = versions[version];
 
+  console.log('seedrandom :', task.random_seed + 6);
   const rng0 = seedrandom(task.random_seed + 6);
   const minLength = 2000;
   const clearText = generate(rng0, minLength, minLength + 50, false);
