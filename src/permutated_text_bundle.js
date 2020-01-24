@@ -6,7 +6,7 @@ import {elements, updateGridGeometry, updateGridVisibleRows, applyPermutation} f
 import HTML5Backend from "react-dnd-html5-backend";
 import {DndProvider, DragSource, DropTarget} from "react-dnd";
 import {symSpecV1} from './symbols_bundle';
-const  {RADIUS, BETWEEN_DOTS, BETWEEN_SYM_VT, BETWEEN_SYM_HZ} = symSpecV1();
+const {RADIUS, BETWEEN_DOTS, BETWEEN_SYM_VT, BETWEEN_SYM_HZ} = symSpecV1();
 
 
 
@@ -42,20 +42,22 @@ function taskInitReducer (state) {
   return {...state, permutationText};
 }
 
+
 function applyRefreshedData (permutationText) {
   let {cells, permCells, dump: {editedPairs}} = permutationText;
-  const ele = [], perm = [];
+  const element = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  let perm = [...element];
 
   for (let key in editedPairs) {
     const target = editedPairs[key];
     key = parseInt(key);
     permCells[key] = target;
     if (key !== target.rank) {
-      ele.push(elements[key]);
-      perm.push(elements[target.rank]);
+      perm[key] = target.rank;
     }
   }
-  cells = applyPermutation(cells, perm.reverse(), ele.reverse());
+
+  cells = applyPermutation(cells, perm);
   permCells = [...permCells];
   return {...permutationText, cells, permCells};
 }
@@ -392,11 +394,11 @@ class PermutationView extends React.PureComponent {
                     }} >
                     {cells}
                   </svg>) : (<div key={index} style={{
-                      position: 'absolute',
-                      left: `${index * cellWidth + 1}px`,
-                      width: `${cellWidth}px`,
-                      height: `${cellHeight}px`
-                    }}></div>)
+                    position: 'absolute',
+                    left: `${index * cellWidth + 1}px`,
+                    width: `${cellWidth}px`,
+                    height: `${cellHeight}px`
+                  }}></div>)
                 )}
               </div>)
             )}

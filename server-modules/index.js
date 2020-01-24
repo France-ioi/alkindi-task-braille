@@ -191,56 +191,69 @@ function applyXORMask (clearSymbols) {
     }));
 }
 
-function applyPermutation (data, _elements, permutation) {
-  const filteredPerm = [];
-  const flipped = [];
 
-  for (let i = 0; i < permutation.length; i++) {
-    const el_str = _elements[i].toString();
-    const pr_str = permutation[i].toString();
-    if (el_str === pr_str || flipped.includes(el_str+':'+pr_str)) {
-      continue;
+function inversePermutation (alphabet, key) {
+  const result = new Array(alphabet.length);
+  for (let i = 0; i < alphabet.length; i += 1) {
+    let pos = alphabet.indexOf(key[i]);
+    if (pos !== -1) {
+      result[pos] = alphabet[i];
     }
-    filteredPerm.push([_elements[i], permutation[i]]);
-    flipped.push(pr_str+':'+el_str);
+    }
+  return result;
   }
+
+function applyPermutation (data, permutation) {
+  const same = 'SAME_INDEX';
+  const diff = 'DIFF_INDEX';
+  const actions = [[], [], []];
+
+  for (let col = 0; col < 3; col++) {
+    for (let i = 0; i < 3; i++) {
+      const index = (col * 3 + i);
+      const perm = permutation[index];
+      if (index === perm) {
+        actions[col].push([same, col, colMasks[i], 0]);
+        continue;
+      }
+      const [fromCol, fromIndex] = elements[perm];
+      actions[col].push([diff, fromCol, colMasks[fromIndex], (i - fromIndex)]);
+    }
+
+    if (
+      actions[col][0][0] === same &&
+      actions[col][1][0] === same &&
+      actions[col][2][0] === same
+    ) {
+      actions[col] = [];
+    }
+      }
 
   return data.map(item => {
 
-    item = item.slice();
+    const newItem = [...item];
 
-    for (let i = 0; i < filteredPerm.length; i++) {
+    for (let i = 0; i < 3; i++) {
+      const action = actions[i];
+      if (action.length === 0) {
+        continue;
+      }
+      let value = 0;
 
-      const [_elements, permutation] = filteredPerm[i];
-
-      let from, to;
-      if (_elements[1] < permutation[1]) {
-        // to get the shift >> | << sign correcly
-        from = _elements;
-        to = permutation;
-      } else {
-        to = _elements;
-        from = permutation;
+      for (let k = 0; k < action.length; k++) {
+        const [, col, mask, shift] = action[k];
+        if (shift === 0) {
+          value +=  (item[col] & mask);
+        } else if (shift > 0) { // >>
+          value +=  (item[col] & mask) >> Math.abs(shift);
+        } else { // <<
+          value +=  (item[col] & mask) << Math.abs(shift);
+        }
       }
 
-      const value1 = item[from[0]];
-      const mask1Index = from[1];
-      const colMask1 = colMasks[mask1Index];
-
-      const value2 = item[to[0]];
-      const mask2Index = to[1];
-      const colMask2 = colMasks[mask2Index];
-
-      const shift = Math.abs(mask1Index - mask2Index);
-
-      if (from[0] === to[0]) {
-        item[to[0]] = ((value1 & colMask1) >> shift) + ((value2 & colMask2) << shift) + (value2 & ~(colMask1 | colMask2));
-      } else {
-        item[to[0]] = ((value1 & colMask1) >> shift) + (value2 & ~colMask2);
-        item[from[0]] = ((value2 & colMask2) << shift) + (value1 & ~colMask1);
-      }
+      newItem[i] = value;
     }
-    return item;
+    return newItem;
   });
 }
 
@@ -265,11 +278,15 @@ function generateTaskData (task) {
 
   const xorSymbols = addXor ? applyXORMask(clearSymbols) : clearSymbols;
 
-  const permutation = generatePermutation(elements, rng0);
+  const perm_input = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
-  console.log('permutation :', permutation);
+  const permutation = generatePermutation(perm_input, rng0);
 
-  const cipherSymbols = addPerm ? applyPermutation(xorSymbols, elements, permutation) : xorSymbols;
+  const inversePermu = inversePermutation(perm_input, permutation);
+  console.log('inverse permutation :', inversePermu.map(n => n + 1));
+
+  const cipherSymbols = addPerm ? applyPermutation(xorSymbols, permutation) : xorSymbols;
+
 
   //debugging...
   // const permutation = [...elements];
