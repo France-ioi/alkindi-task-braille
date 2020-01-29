@@ -15,7 +15,7 @@ class Hint1View extends React.PureComponent {
                     {"Pour un coût de "}
                     <span style={{fontWeight: "bold"}}>{'10 points'}</span>
                     {
-                        ", cliquez sur une case de substitution et validez pour obtenir sa valeur."
+                        ", cliquez sur une case du texte décrypté et validez pour obtenir sa valeur."
                     }
                 </p>
                 <div style={{textAlign: "center", margin: "10px 0"}}>
