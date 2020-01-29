@@ -91,17 +91,18 @@ function SubstitutionSelector (state) {
       decipheredCellEditCancelled,
       substitutionCellEditCancelled, substitutionCellEditStarted, substitutionCellEditMoved
     },
+    frequencyAnalysis,
     substitutions, editing,
     symbols: {sym1Small: singleSymbol},
-    taskData: {alphabet},
     editingDecipher,
   } = state;
   const {cells, selectedAlphabet} = substitutions;
+  const {frequencyCount} = frequencyAnalysis;
   return {
     substitutionCellEditStarted, substitutionCellEditCancelled, substitutionCellEditMoved,
     substitutionCellLockChanged, substitutionCellCharChanged,
     decipheredCellEditCancelled,
-    editingDecipher, cells, nbCells: alphabet.length, selectedAlphabet, singleSymbol, editingRank: editing.cellRank
+    editingDecipher, cells, nbCells: frequencyCount, selectedAlphabet, singleSymbol, editingRank: editing.cellRank
   };
 }
 
