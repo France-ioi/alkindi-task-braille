@@ -105,17 +105,9 @@ module.exports.gradeAnswer = function (args, task_data, callback) {
   } = generateTaskData(args.task);
 
   const {
-    substitutions,
-    decipheredLetters
+    answerText
   } = JSON.parse(args.answer.value);
 
-  const correctLetters = [];
-  for (let i = 0; i < substitutions.length; i++) {
-    const [numValue, alphabetIndex] = substitutions[i];
-    if (symbolAlphabet[alphabetIndex] === numValue) {
-      correctLetters.push(alphabet[alphabetIndex]);
-    }
-  }
 
   const evalLength = 200; /* Score on first 200 characters only */
 
@@ -131,13 +123,8 @@ module.exports.gradeAnswer = function (args, task_data, callback) {
 
   let correctChars = 0;
   for (let i = 0; i < evalLength; i += 1) {
-    if (correctLetters.includes(evalClearText[i])) {
+    if (answerText[i] === evalClearText[i]) {
       correctChars += 1;
-    } else {
-      if (decipheredLetters[i] !== undefined &&
-        decipheredLetters[i].charAt === evalClearText[i]) {
-        correctChars += 1;
-      }
     }
   }
 

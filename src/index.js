@@ -17,7 +17,8 @@ import SubstitutionsBundle from './substitutions_bundle';
 import DecipheredTextBundle from './deciphered_text_bundle';
 import HintsBundle from './hints_bundle';
 import WorkspaceBundle from './workspace_bundle';
-import {loadSubstitutions} from './utils';
+import {loadSubstitutions, applySubstitutions} from './utils';
+
 
 const TaskBundle = {
   actionReducers: {
@@ -80,31 +81,57 @@ function taskRefreshReducer (state, _action) {
 }
 
 function getTaskAnswer (state) {
-  const {taskData: {alphabet}, decipheredText, permutationText, xorText, andText} = state;
+  const {taskData: {alphabet}, decipheredText, substitutions, permutationText, xorText, andText} = state;
+  const {cells, decipheredLetters: decipheredLetterS} = decipheredText;
 
   let decipheredLetters = {};
-  Object.keys(decipheredText.decipheredLetters)
+  Object.keys(decipheredLetterS)
     .forEach(key => {
-      const {charAt, isHint} = decipheredText.decipheredLetters[key];
+      const {charAt, isHint} = decipheredLetterS[key];
       if (charAt !== null && (isHint === undefined || !isHint)) {
         decipheredLetters[key] = {charAt};
       }
     });
 
-  return {
-    substitutions: state.substitutions.cells
-      .reduce((arr, {editable}, index) => {
-        const rank = alphabet.indexOf(editable);
-        if (rank !== -1) {
-          arr.push([index, rank]);
-        }
-        return arr;
-      }, []),
-    permutation: permutationText.dump,
-    xor: xorText.dump,
-    and: andText.dump,
-    decipheredLetters,
-  };
+  const position = cells.length - 1;
+
+  function getCell (index) {
+    const ciphered = cells[index];
+    let cell = {position: index, ciphered};
+    let rank = ciphered;
+    if (index <= position) {
+      Object.assign(cell, applySubstitutions(substitutions, rank));
+      if (cell.rank !== -1) {
+        return alphabet[cell.rank];
+      }
+      if (decipheredLetters[index]) {
+        return decipheredLetters[index].charAt;
+      }
+    }
+    return " ";
+  }
+
+  let answerText = '';
+  for (let i = 0; i < 200; i++) {
+    answerText += getCell(i);
+  }
+
+
+    return {
+      substitutions: state.substitutions.cells
+        .reduce((arr, {editable}, index) => {
+          const rank = alphabet.indexOf(editable);
+          if (rank !== -1) {
+            arr.push([index, rank]);
+          }
+          return arr;
+        }, []),
+      permutation: permutationText.dump,
+      xor: xorText.dump,
+      and: andText.dump,
+      decipheredLetters,
+      answerText
+    };
 }
 
 function taskAnswerLoaded (state, {payload: {answer}}) {
