@@ -354,7 +354,7 @@ class PermutationView extends React.PureComponent {
           permCells={permCells}
           onLock={this.onPermLock}
           onDrop={this.onPermSwapPairs} />
-        <h3>Result of permutation</h3>
+        <h3>Résultat de la permutation</h3>
         <div
           ref={this.refTextBox}
           onScroll={this.onScroll}
