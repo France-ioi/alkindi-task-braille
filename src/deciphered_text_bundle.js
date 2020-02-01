@@ -232,7 +232,7 @@ class TextCell extends React.PureComponent {
       backgroundColor: (isHint || locked) ? ((!isHint) ? '#e2e2e2' : (isConflict ? '#fcc' : '#a2a2a2')) : '#fff'
     };
 
-    const inputStyle = {width: '20px', height: '20px', textAlign: 'center', padding: '0', outline: '0', border: none};
+    const inputStyle = {width: '20px', height: '20px', textAlign: 'center', padding: '0', outline: '0', border: 'none'};
 
     if (isConflict) {
       editableCellStyle.backgroundColor = '#fcc';
