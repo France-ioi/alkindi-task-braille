@@ -229,7 +229,7 @@ class TextCell extends React.PureComponent {
       borderRight: '1px solid #eee',
       textAlign: 'center',
       cursor: 'text',
-      backgroundColor: (isHint || locked) ? ((!isHint) ? '#e2e2e2' : (isConflict ? '#fcc' : '#a2a2a2')) : '#fff'
+      backgroundColor: (isHint || locked) ? ((!isHint) ? '#aaffaa' : (isConflict ? '#fcc' : '#a2a2a2')) : '#fff'
     };
 
     const inputStyle = {width: '20px', height: '20px', textAlign: 'center', padding: '0', outline: '0', border: 'none'};
