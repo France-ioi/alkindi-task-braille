@@ -25,19 +25,19 @@ class Workspace extends React.PureComponent {
         <CipheredText />
         <br />
         {addPerm && (<>
-          <h2>{"Permutation :"}</h2>
+          <h2>{"Permutation"}</h2>
           <PermutatedText />
           <br />
         </>)
         }
         {addXor && (<>
-          <h2>{"Masque XOR :"}</h2>
+          <h2>{"Masque XOR"}</h2>
           <XORText />
           <br />
         </>)
         }
         {addAnd && (<>
-          <h2>{"Masque ET :"}</h2>
+          <h2>{"Masque ET"}</h2>
           <ANDText />
           <br />
         </>)
@@ -45,14 +45,14 @@ class Workspace extends React.PureComponent {
         <h2>{"Analyse de fréquences"}</h2>
         <FrequencyAnalysis />
         <br />
-        <h2>Substitution:</h2>
+        <h2>Substitution</h2>
         <div className="clearfix">
           <div>
             <Substitution />
           </div>
         </div>
         <br />
-        <h2>Indices :</h2>
+        <h2>Indices</h2>
         <Hints />
         <HintRequestFeedback />
         <br />
