@@ -358,3 +358,9 @@ svg {
 .group-color-4 {
   background-color: #5df3a0 !important;
 }
+::selection {
+  background: #001beb; /* WebKit/Blink Browsers */
+}
+::-moz-selection {
+  background: #001beb; /* Gecko Browsers */
+}
