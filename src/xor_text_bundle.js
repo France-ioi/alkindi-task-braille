@@ -124,9 +124,9 @@ function XORViewSelector (state) {
 
 const XORNoteText = () => (<div style={{height: 150}} className="xor_note">
   <b />
-  <p>Click on a dot to flip its color.</p>
-  <p>Click on a triangle to flip a column.</p>
-  <p>A black dot means every dot in this position within a block of 3 symbols will be flipped in the text</p>
+  <p>Cliquez sur un point pour changer sa couleur.</p>
+  <p>Cliquez sur un triangle pour inverser une colonne.</p>
+  <p>Un point noir signifie que tout point à cette position dans un bloc de 3 symboles sera inversé dans le texte.</p>
 </div>);
 
 class XORTool extends React.PureComponent {
@@ -165,7 +165,7 @@ class XORView extends React.PureComponent {
           onBitClick={this.onBitClick}
           onTriangleClick={this.onTriangleClick}
         />
-        <h3>Result of XOR Mask</h3>
+        <h3>Résultat du masque XOR</h3>
         <div
           ref={this.refTextBox}
           onScroll={this.onScroll}

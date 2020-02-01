@@ -21,28 +21,28 @@ class Workspace extends React.PureComponent {
     } = this.props;
     return (
       <div>
-        <h2>{"Encrypted message"}</h2>
+        <h2>{"Message chiffré"}</h2>
         <CipheredText />
         <br />
         {addPerm && (<>
-          <h2>{"Permutation:"}</h2>
+          <h2>{"Permutation :"}</h2>
           <PermutatedText />
           <br />
         </>)
         }
         {addXor && (<>
-          <h2>{"XOR Mask:"}</h2>
+          <h2>{"Masque XOR :"}</h2>
           <XORText />
           <br />
         </>)
         }
         {addAnd && (<>
-          <h2>{"AND Mask:"}</h2>
+          <h2>{"Masque ET :"}</h2>
           <ANDText />
           <br />
         </>)
         }
-        <h2>{"Frequency Analysis"}</h2>
+        <h2>{"Analyse de fréquences"}</h2>
         <FrequencyAnalysis />
         <br />
         <h2>Substitution:</h2>
@@ -52,11 +52,11 @@ class Workspace extends React.PureComponent {
           </div>
         </div>
         <br />
-        <h2>Hints:</h2>
+        <h2>Indices :</h2>
         <Hints />
         <HintRequestFeedback />
         <br />
-        <h2>{"Decrypted text"}</h2>
+        <h2>{"Texte déchiffré"}</h2>
         <DecipheredText />
       </div>
     );
