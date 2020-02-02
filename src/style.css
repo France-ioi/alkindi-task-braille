@@ -18,9 +18,12 @@
 
 .xor_wrapper .xor_tool {
   position: relative;
-  width: 400px;
-  height: 180px;
+  width: 420px;
+  height: 200px;
   float: left;
+  padding-top: 20px;
+  padding-left: 20px;
+  background-color: #A0A0A0;
 }
 
 i.fa-unlock-alt {
