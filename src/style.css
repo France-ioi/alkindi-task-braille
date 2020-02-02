@@ -1,19 +1,28 @@
 
 .perm_wrapper,
-.xor_wrapper {
+.xor_wrapper,
+.and_wrapper {
   position: relative;
   margin-left: 50px;
   margin-top: 50px;
   margin-bottom: 60px;
 }
 
-.xor_wrapper .xor_note {
+.xor_wrapper .xor_note,
+.and_wrapper .and_note {
   display: inline-block;
   width: 235px;
   margin-left: 50px;
   margin-top: 10px;
   font-size: 14px;
   font-weight: 600;
+}
+
+.and_wrapper .and_tool {
+  position: relative;
+  width: 400px;
+  height: 180px;
+  float: left;
 }
 
 .xor_wrapper .xor_tool {

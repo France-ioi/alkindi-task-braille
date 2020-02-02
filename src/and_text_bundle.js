@@ -127,7 +127,7 @@ function ANDViewSelector (state) {
 }
 
 
-const ANDNoteText = () => (<div className="xor_note">
+const ANDNoteText = () => (<div className="and_note">
   <p>Cliquez sur un point pour changer sa couleur.</p>
   <p>Cliquez sur un triangle pour inverser sa colonne.</p>
   <p>Un point noir signifie que tout point à cette position dans un bloc de 3 symboles sera conservé, tandis qu'un point gris signifie que le point du bloc deviendra gris.</p>
@@ -139,8 +139,8 @@ class ANDTool extends React.PureComponent {
   render () {
     const {andMask, sym3Big, onBitClick, onTriangleClick} = this.props;
     return (
-      <div className="xor_wrapper">
-        <div className="xor_tool">
+      <div className="and_wrapper">
+        <div className="and_tool">
           <svg className={`_${andMask[0]}a _${andMask[1]}b _${andMask[2]}c`}
             width={sym3Big.width}
             height={sym3Big.height}
