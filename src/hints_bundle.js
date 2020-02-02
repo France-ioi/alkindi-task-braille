@@ -13,7 +13,7 @@ class Hint1View extends React.PureComponent {
             <div style={customBorder}>
                 <p>
                     {"Pour un coût de "}
-                    <span style={{fontWeight: "bold"}}>{'10 points'}</span>
+                    <span style={{fontWeight: "bold"}}>{'5 points'}</span>
                     {
                         ", cliquez sur une case du texte décrypté et validez pour obtenir sa valeur."
                     }
