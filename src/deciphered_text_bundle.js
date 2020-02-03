@@ -163,7 +163,7 @@ class DecipheredTextView extends React.PureComponent {
   render () {
     const {editingDecipher, singleSymbol, width, height, visibleRows, cellWidth, cellHeight, bottom} = this.props;
     return (
-      <div ref={this.refTextBox} onScroll={this.onScroll} style={{position: 'relative', width: width && `${width}px`, height: height && `${height}px`, overflowY: 'scroll', border: 'solid black 1px'}}>
+      <div ref={this.refTextBox} onScroll={this.onScroll} style={{position: 'relative', width: '100%', height: height && `${height}px`, overflowY: 'scroll', border: 'solid black 1px'}}>
         {(visibleRows || []).map(({index, columns}) =>
           <div key={index} style={{position: 'absolute', top: `${index * cellHeight}px`}}>
             {columns.filter(c => c !== null).map(({index, position, ciphered, charAt, clear, isHint, locked, colorClass, borderClass}) =>
