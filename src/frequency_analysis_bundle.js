@@ -128,7 +128,7 @@ function normalizeAndSortFrequencies (entries) {
 }
 
 function FrequencyAnalysisSelector (state) {
-  const {editingDecipher, frequencyAnalysis: {textFrequencies, visibleLetters, totalChars, frequencyCount}, symbols: {sym1Small: singleSymbol}} = state;
+  const {taskData: {version:{version}}, editingDecipher, frequencyAnalysis: {textFrequencies, visibleLetters, totalChars, frequencyCount}, symbols: {sym1Small: singleSymbol}} = state;
   const scale = 30 / referenceFrequencies.reduce((a, x) => Math.max(a, x.proba), 0);
   return {
     editingDecipher,
@@ -138,7 +138,8 @@ function FrequencyAnalysisSelector (state) {
     textFrequencies,
     totalChars,
     frequencyCount,
-    scale
+    scale,
+    version,
   };
 }
 
@@ -148,12 +149,12 @@ const numberStyle = {
 
 class FrequencyAnalysisView extends React.PureComponent {
   render () {
-    const {editingDecipher, singleSymbol, visibleLetters, totalChars, frequencyCount, referenceFrequencies, textFrequencies, scale} = this.props;
+    const {version, editingDecipher, singleSymbol, visibleLetters, totalChars, frequencyCount, referenceFrequencies, textFrequencies, scale} = this.props;
     if (!referenceFrequencies) return false;
 
     return (
       <div className='clearfix'>
-        <h6><b>&nbsp;&nbsp;&nbsp;&nbsp;Frequencies of the <i style={numberStyle}>{frequencyCount}</i> most frequent symbols, out of {<i style={numberStyle}>{totalChars}</i>} present in the message after applying the AND tool.</b></h6>
+        {version !== 1 && <h6><b>&nbsp;&nbsp;&nbsp;&nbsp;Frequencies of the <i style={numberStyle}>{frequencyCount}</i> most frequent symbols, out of {<i style={numberStyle}>{totalChars}</i>} present in the message after applying the AND tool.</b></h6>}
         <div style={{float: 'left', width: '100px', height: '108px', fontSize: '10px', lineHeight: '10px', position: 'relative'}}>
           <div style={{height: '30px', position: 'absolute', top: '6px'}}>
             {"Fréquences dans le texte :"}

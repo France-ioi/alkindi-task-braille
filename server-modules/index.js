@@ -186,9 +186,9 @@ function inversePermutation (alphabet, key) {
     if (pos !== -1) {
       result[pos] = alphabet[i];
     }
-    }
-  return result;
   }
+  return result;
+}
 
 function applyPermutation (data, permutation) {
   const same = 'SAME_INDEX';
@@ -214,7 +214,7 @@ function applyPermutation (data, permutation) {
     ) {
       actions[col] = [];
     }
-      }
+  }
 
   return data.map(item => {
 
@@ -244,12 +244,11 @@ function applyPermutation (data, permutation) {
   });
 }
 
-const versions = [
-  [],
-  {version: 1, addPerm: false, addXor: false, addAnd: false},
-  {version: 2, addPerm: true, addXor: false, addAnd: true},
-  {version: 3, addPerm: true, addXor: true, addAnd: true}
-];
+const versions = {
+  "1": {version: 1, addPerm: false, addXor: false, addAnd: false},
+  "2": {version: 2, addPerm: true, addXor: false, addAnd: true},
+  "3": {version: 3, addPerm: true, addXor: true, addAnd: true}
+};
 
 // module.exports.generateTaskData =
 function generateTaskData (task) {
