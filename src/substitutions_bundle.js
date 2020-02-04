@@ -29,13 +29,13 @@ function taskRefreshReducer (state, _action) {
 }
 
 function substitutionCellEditStartedReducer (state, {payload: {cellRank}}) {
-  const {alphabet} = state.taskData;
-  cellRank = wrapAround(cellRank, alphabet.length);
+  const {frequencyAnalysis: {frequencyCount}} = state;
+  cellRank = wrapAround(cellRank, frequencyCount);
   return update(state, {editing: {$set: {cellRank}}});
 }
 
 function substitutionCellEditMovedReducer (state, {payload: {cellMove}}) {
-  let {taskData: {alphabet}, substitutions: {cells, selectedAlphabet}, editing: {cellRank}} = state;
+  let {frequencyAnalysis: {frequencyCount}, substitutions: {cells, selectedAlphabet}, editing: {cellRank}} = state;
   let cellStop = cellRank;
   if (cellRank === undefined) return state;
   let cell;
