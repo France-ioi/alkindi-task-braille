@@ -165,6 +165,7 @@ class XORView extends React.PureComponent {
           onBitClick={this.onBitClick}
           onTriangleClick={this.onTriangleClick}
         />
+        <br />
         <h3>Résultat du masque XOR</h3>
         <div
           ref={this.refTextBox}
