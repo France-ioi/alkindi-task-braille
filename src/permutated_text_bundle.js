@@ -168,7 +168,7 @@ const BareSubstTarget = props => {
     isDragSource && "dd_cell-draggable",
   ];
 
-  let span = (<span className={classnames(classesTxt)}>{target + 1}</span>);
+  let span = (<span className={classnames(classesTxt)}>{isDragging ? ' ' : target + 1}</span>);
   if (isDragSource) span = connectDragSource(span);
 
   let el = (

@@ -101,6 +101,10 @@ i.fa-unlock-alt {
   margin: auto;
 }
 
+.dragging .dd_txt {
+  background-color: transparent !important;
+}
+
 .dd_cell-draggable:hover span {
   background: #ccc;
 }
