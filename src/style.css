@@ -40,13 +40,13 @@ i.fa-unlock-alt {
 }
 
 h2 > i.collapse_anchor {
-  font-size: 2.54rem;
+  font-size: 2.1rem;
   position: relative;
   top: -4px;
 }
 
 h3 > i.collapse_anchor {
-  font-size: 2.1rem;
+  font-size: 1.5rem;
   position: relative;
   top: -2px;
 }
