@@ -148,12 +148,12 @@ function taskAnswerLoaded (state, {payload: {answer}}) {
   });
 }
 
-function getTaskState (state) {
-  return state;
+function getTaskState (_state) {
+  return {};
 }
 
-function taskStateLoaded (state, {payload: {_dump}}) {
-  return state;
+function taskStateLoaded (_state, {payload: {_dump}}) {
+  return {};
 }
 
 export function run (container, options) {
