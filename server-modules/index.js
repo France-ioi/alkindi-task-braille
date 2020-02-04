@@ -245,6 +245,7 @@ function applyPermutation (data, permutation) {
 }
 
 const versions = {
+  "0.5": {version: 1, freeHints: true, addPerm: false, addXor: false, addAnd: false},
   "1": {version: 1, freeHints: false, addPerm: false, addXor: false, addAnd: false},
   "1.5": {version: 1.5, freeHints: true, addPerm: true, addXor: false, addAnd: true},
   "2": {version: 2, freeHints: false, addPerm: true, addXor: false, addAnd: true},
