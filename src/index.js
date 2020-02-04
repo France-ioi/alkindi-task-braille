@@ -152,8 +152,8 @@ function getTaskState (_state) {
   return {};
 }
 
-function taskStateLoaded (_state, {payload: {_dump}}) {
-  return {};
+function taskStateLoaded (state, {payload: {_dump}}) {
+  return state;
 }
 
 export function run (container, options) {
