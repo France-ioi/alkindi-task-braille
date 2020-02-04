@@ -29,9 +29,7 @@ class Workspace extends React.PureComponent {
         {addPerm && (<>
           <Collapsable title={<h2>{"Permutation"}</h2>}>
             <br />
-            <br />
             <PermutatedText />
-            <br />
             <br />
           </Collapsable>
           <br />
@@ -39,7 +37,6 @@ class Workspace extends React.PureComponent {
         }
         {addXor && (<>
           <Collapsable title={<h2>{"Masque XOR"}</h2>}>
-            <br />
             <br />
             <XORText />
             <br />
@@ -50,7 +47,6 @@ class Workspace extends React.PureComponent {
         {addAnd && (<>
           <Collapsable title={<h2>{"Masque ET"}</h2>}>
             <div>
-              <br />
               <br />
               <ANDText />
               <br />
