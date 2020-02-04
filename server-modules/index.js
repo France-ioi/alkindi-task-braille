@@ -245,15 +245,26 @@ function applyPermutation (data, permutation) {
 }
 
 const versions = {
-  "1": {version: 1, addPerm: false, addXor: false, addAnd: false},
-  "2": {version: 2, addPerm: true, addXor: false, addAnd: true},
-  "3": {version: 3, addPerm: true, addXor: true, addAnd: true}
+  "1": {version: 1, freeHints: false, addPerm: false, addXor: false, addAnd: false},
+  "1.5": {version: 1.5, freeHints: true, addPerm: true, addXor: false, addAnd: true},
+  "2": {version: 2, freeHints: false, addPerm: true, addXor: false, addAnd: true},
+  "3": {version: 3, freeHints: false, addPerm: true, addXor: true, addAnd: true}
 };
+
+const nbFreeHints = 50;
+
+function getFreeHints (clearText) {
+  const hints = [];
+  for (let i = 0; i < nbFreeHints; i++) {
+    hints.push({cellRank: i, symbol:clearText[i], type: 'type_3'});
+  }
+  return hints;
+}
 
 // module.exports.generateTaskData =
 function generateTaskData (task) {
-  const version = parseInt(task.params.version) || 1;
-  const {addPerm, addXor} = versions[version];
+  const version = task.params.version || 1;
+  const {freeHints, addPerm, addXor} = versions[version];
 
   console.log('seedrandom :', task.random_seed + 6);
   const rng0 = seedrandom(task.random_seed + 6);
@@ -284,7 +295,11 @@ function generateTaskData (task) {
   // hints per message
   const hintsRequested = getHintsRequested(task.hints_requested);
 
-  const hints = grantHints(hintsRequested, clearText);
+  let hints = grantHints(hintsRequested, clearText);
+
+  if (freeHints) {
+    hints = hints.concat(getFreeHints(clearText));
+  }
 
   const publicData = {
     alphabet,
@@ -317,8 +332,7 @@ function generatePermutation (deck, rngKeys) {
 
 function hintRequestEqual (h1, h2) {
   return (
-    h1.cellRank === h2.cellRank &&
-    h1.type == h2.type
+    h1.cellRank === h2.cellRank
   );
 }
 

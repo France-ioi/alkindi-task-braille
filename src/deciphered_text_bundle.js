@@ -26,7 +26,20 @@ function appInitReducer (state, _action) {
 }
 
 function taskInitReducer (state, _action) {
-  let {decipheredText, substitutions: {cells: substitutionCells}, frequencyAnalysis: {cells}} = state;
+  let {decipheredText, substitutions: {cells: substitutionCells}, frequencyAnalysis: {cells}, taskData: {hints}} = state;
+  if (hints.length > 0) {
+    const hintsData = {};
+    hints.forEach(({cellRank: j, symbol, type}) => {
+      if (type === 'type_3') {
+        hintsData[j] = {
+          charAt: symbol,
+          isHint: true,
+        };
+      }
+    });
+    decipheredText = update(decipheredText, {decipheredLetters: {$merge: hintsData}});
+  }
+
   decipheredText = {...decipheredText, cells, substitutionCells, nbCells: cells.length};
   return applyRefreshedData({...state, decipheredText});
 }
@@ -41,7 +54,7 @@ function taskRefreshReducer (state) {
 
   const hintsData = {};
   hints.forEach(({cellRank: j, symbol, type}) => {
-    if (type === 'type_1') {
+    if (type === 'type_1' || type === 'type_3') {
       hintsData[j] = {
         charAt: symbol,
         isHint: true,
