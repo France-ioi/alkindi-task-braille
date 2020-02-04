@@ -1,13 +1,15 @@
 
 .perm_wrapper,
-.xor_wrapper {
+.xor_wrapper,
+.and_wrapper {
   position: relative;
   margin-left: 50px;
   margin-top: 50px;
   margin-bottom: 60px;
 }
 
-.xor_wrapper .xor_note {
+.xor_wrapper .xor_note,
+.and_wrapper .and_note {
   display: inline-block;
   width: 235px;
   margin-left: 50px;
@@ -16,15 +18,37 @@
   font-weight: 600;
 }
 
-.xor_wrapper .xor_tool {
+.and_wrapper .and_tool {
   position: relative;
   width: 400px;
   height: 180px;
   float: left;
 }
 
+.xor_wrapper .xor_tool {
+  position: relative;
+  width: 420px;
+  height: 200px;
+  float: left;
+  padding-top: 20px;
+  padding-left: 20px;
+  background-color: #A0A0A0;
+}
+
 i.fa-unlock-alt {
   color: #6F6F6F;
+}
+
+h2 > i.collapse_anchor {
+  font-size: 2.54rem;
+  position: relative;
+  top: -4px;
+}
+
+h3 > i.collapse_anchor {
+  font-size: 2.1rem;
+  position: relative;
+  top: -2px;
 }
 
 .triangle {
@@ -38,7 +62,7 @@ i.fa-unlock-alt {
 
 .perm_line h4 {
   display: inline;
-  margin-right: 30px;
+  margin-right: 32px;
 }
 
 .perm_line > div {
@@ -54,7 +78,7 @@ i.fa-unlock-alt {
   margin-top: 0px;
 }
 .perm_line.line2 h4 {
-  margin-right: 45px;
+  margin-right: 32px;
   vertical-align: top;
 }
 
@@ -361,4 +385,12 @@ svg {
 }
 .group-color-4 {
   background-color: #5df3a0 !important;
+}
+::selection {
+  background: #001beb; /* WebKit/Blink Browsers */
+  color: white;
+}
+::-moz-selection {
+  background: #001beb; /* Gecko Browsers */
+  color: white;
 }

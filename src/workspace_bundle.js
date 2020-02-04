@@ -22,7 +22,7 @@ class Workspace extends React.PureComponent {
     } = this.props;
     return (
       <div>
-        <Collapsable title={<h2>{"Encrypted message"}</h2>}>
+        <Collapsable title={<h2>{"Message chiffré"}</h2>}>
           <CipheredText />
         </Collapsable>
         <br />
@@ -34,20 +34,20 @@ class Workspace extends React.PureComponent {
         </>)
         }
         {addXor && (<>
-          <Collapsable title={<h2>{"XOR Mask"}</h2>}>
+          <Collapsable title={<h2>{"Masque XOR"}</h2>}>
             <XORText />
           </Collapsable>
           <br />
         </>)
         }
         {addAnd && (<>
-          <Collapsable title={<h2>{"AND Mask"}</h2>}>
+          <Collapsable title={<h2>{"Masque ET"}</h2>}>
             <ANDText />
           </Collapsable>
           <br />
         </>)
         }
-        <Collapsable title={<h2>{"Frequency Analysis"}</h2>}>
+        <Collapsable title={<h2>{"Analyse de fréquences"}</h2>}>
           <FrequencyAnalysis />
         </Collapsable>
         <br />
@@ -59,12 +59,12 @@ class Workspace extends React.PureComponent {
           </div>
         </Collapsable>
         <br />
-        <Collapsable title={<h2>{"Hints"}</h2>}>
+        <Collapsable title={<h2>{"Indices"}</h2>}>
           <Hints />
         </Collapsable>
         <HintRequestFeedback />
         <br />
-        <Collapsable title={<h2>{"Decrypted text"}</h2>}>
+        <Collapsable title={<h2>{"Texte déchiffré"}</h2>}>
           <DecipheredText />
         </Collapsable>
       </div>

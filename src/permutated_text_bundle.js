@@ -319,12 +319,12 @@ class PermutaionTool extends React.PureComponent {
     return (
       <div className="perm_wrapper">
         <div className="perm_line">
-          <h4>Before:</h4>
+          <h4>Avant :</h4>
           <NumberHeader />
         </div>
         <LinesSvg permCells={permCells} />
         <div className="perm_line line2">
-          <h4>After:</h4>
+          <h4>Après :</h4>
           <DndProvider backend={HTML5Backend}>
             <div>
               {permCells.map((cell, i) => {
@@ -355,7 +355,7 @@ class PermutationView extends React.PureComponent {
           permCells={permCells}
           onLock={this.onPermLock}
           onDrop={this.onPermSwapPairs} />
-        <Collapsable title={<h3>{"Result of permutation"}</h3>}>
+        <Collapsable title={<h3>{"Résultat de la permutation"}</h3>}>
           <div
             ref={this.refTextBox}
             onScroll={this.onScroll}

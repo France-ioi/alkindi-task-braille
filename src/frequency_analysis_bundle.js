@@ -154,7 +154,7 @@ class FrequencyAnalysisView extends React.PureComponent {
 
     return (
       <div className='clearfix'>
-        {version !== 1 && <h6><b>&nbsp;&nbsp;&nbsp;&nbsp;Frequencies of the <i style={numberStyle}>{frequencyCount}</i> most frequent symbols, out of {<i style={numberStyle}>{totalChars}</i>} present in the message after applying the AND tool.</b></h6>}
+        {version > 1 && <h6><b>&nbsp;&nbsp;&nbsp;&nbsp;Fréquences des <i style={numberStyle}>{frequencyCount}</i> symboles les plus fréquents, parmi {<i style={numberStyle}>{totalChars}</i>} presents dans le message après application du masque ET.</b></h6>}
         <div style={{float: 'left', width: '100px', height: '108px', fontSize: '10px', lineHeight: '10px', position: 'relative'}}>
           <div style={{height: '30px', position: 'absolute', top: '6px'}}>
             {"Fréquences dans le texte :"}

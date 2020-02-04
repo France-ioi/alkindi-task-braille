@@ -213,7 +213,7 @@ class SubstitutionCell extends React.PureComponent {
       <div style={editableCellStyle} onClick={this.startEditing}>
         {isEditing
           ? <input ref={this.refInput} onChange={this.cellChanged} onKeyDown={this.keyDown}
-            type='text' value={editableChar || ''} style={{width: '19px', height: '20px', textAlign: 'center'}} />
+            type='text' value={editableChar || ''} style={{width: '19px', height: '20px', textAlign: 'center', padding: '0', outline: '0', border: 'none'}} />
           : (editableChar || '\u00A0')}
       </div>
     );

@@ -143,7 +143,7 @@ module.exports.gradeAnswer = function (args, task_data, callback) {
       const nHints1 = (hintsRequested.filter(h => h.type === 'type_1')).length || 0;
       const nHints = hintsRequested.length;
 
-      score = Math.max(0, 100 - (nHints1 * 10));
+      score = Math.max(0, 100 - (nHints1 * 5));
       message = `Bravo, vous avez bien déchiffré le texte. Vous avez utilisé ${nHints} indice${
         nHints > 1 ? "s" : ""
         }.`;
@@ -245,7 +245,7 @@ function applyPermutation (data, permutation) {
 }
 
 const versions = {
-  "0.5": {version: 1, freeHints: true, addPerm: false, addXor: false, addAnd: false},
+  "0.5": {version: 0.5, freeHints: true, addPerm: false, addXor: false, addAnd: false},
   "1": {version: 1, freeHints: false, addPerm: false, addXor: false, addAnd: false},
   "1.5": {version: 1.5, freeHints: true, addPerm: true, addXor: false, addAnd: true},
   "2": {version: 2, freeHints: false, addPerm: true, addXor: false, addAnd: true},

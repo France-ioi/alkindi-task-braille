@@ -127,10 +127,10 @@ function ANDViewSelector (state) {
 }
 
 
-const ANDNoteText = () => (<div className="xor_note">
-  <p>Click on a dot to flip its color.</p>
-  <p>Click on a triangle to flip a column.</p>
-  <p>A black dot means every dot in this position within its block will be preserved, while a gray dot means it will become gray.</p>
+const ANDNoteText = () => (<div className="and_note">
+  <p>Cliquez sur un point pour changer sa couleur.</p>
+  <p>Cliquez sur un triangle pour inverser sa colonne.</p>
+  <p>Un point noir signifie que tout point à cette position dans un bloc de 3 symboles sera conservé, tandis qu'un point gris signifie que le point du bloc deviendra gris.</p>
 </div>);
 
 
@@ -139,8 +139,8 @@ class ANDTool extends React.PureComponent {
   render () {
     const {andMask, sym3Big, onBitClick, onTriangleClick} = this.props;
     return (
-      <div className="xor_wrapper">
-        <div className="xor_tool">
+      <div className="and_wrapper">
+        <div className="and_tool">
           <svg className={`_${andMask[0]}a _${andMask[1]}b _${andMask[2]}c`}
             width={sym3Big.width}
             height={sym3Big.height}
@@ -170,7 +170,7 @@ class ANDView extends React.PureComponent {
           onBitClick={this.onBitClick}
           onTriangleClick={this.onTriangleClick}
         />
-        <h3>Result of AND Mask</h3>
+        <h3>Résultat du masque ET</h3>
         <div
           ref={this.refTextBox}
           onScroll={this.onScroll}

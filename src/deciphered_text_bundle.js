@@ -177,7 +177,7 @@ class DecipheredTextView extends React.PureComponent {
   render () {
     const {editingDecipher, highlightSymbol, singleSymbol, width, height, visibleRows, cellWidth, cellHeight, bottom} = this.props;
     return (
-      <div ref={this.refTextBox} onScroll={this.onScroll} style={{position: 'relative', width: width && `${width}px`, height: height && `${height}px`, overflowY: 'scroll'}}>
+      <div ref={this.refTextBox} onScroll={this.onScroll} style={{position: 'relative', width: '100%', height: height && `${height}px`, overflowY: 'scroll', border: 'solid black 1px'}}>
         {(visibleRows || []).map(({index, columns}) =>
           <div key={index} style={{position: 'absolute', top: `${index * cellHeight}px`}}>
             {columns.filter(c => c !== null).map(({index, position, ciphered, charAt, clear, isHint, locked, colorClass, borderClass}) =>
@@ -243,10 +243,10 @@ class TextCell extends React.PureComponent {
       borderRight: '1px solid #eee',
       textAlign: 'center',
       cursor: 'text',
-      backgroundColor: (isHint || locked) ? ((!isHint) ? '#e2e2e2' : (isConflict ? '#fcc' : '#a2a2a2')) : '#fff'
+      backgroundColor: (isHint || locked) ? ((!isHint) ? '#a2a2a2' : (isConflict ? '#fcc' : '#aaffaa')) : (clear ? '#e2e2e2' : '#fff')
     };
 
-    const inputStyle = {width: '20px', height: '20px', textAlign: 'center'};
+    const inputStyle = {width: '20px', height: '20px', textAlign: 'center', padding: '0', outline: '0', border: 'none'};
 
     if (isConflict) {
       editableCellStyle.backgroundColor = '#fcc';
