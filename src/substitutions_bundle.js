@@ -16,7 +16,7 @@ function appInitReducer (state, _action) {
 function taskInitReducer (state, _action) {
   const {alphabet} = state.taskData;
   const selectedAlphabet = state.frequencyAnalysis.textFrequencies;
-  const  substitutions = loadSubstitutions(alphabet, selectedAlphabet,  []);
+  const substitutions = loadSubstitutions(alphabet, selectedAlphabet, []);
   return {...state, substitutions, taskReady: true};
 }
 
@@ -29,9 +29,10 @@ function taskRefreshReducer (state, _action) {
 }
 
 function substitutionCellEditStartedReducer (state, {payload: {cellRank}}) {
-  const {frequencyAnalysis: {frequencyCount}} = state;
+  const {frequencyAnalysis: {frequencyCount}, substitutions: {selectedAlphabet}} = state;
+  const {symbol} = selectedAlphabet[cellRank];
   cellRank = wrapAround(cellRank, frequencyCount);
-  return update(state, {editing: {$set: {cellRank}}});
+  return update(state, {highlightSymbol: {$set: symbol}, editing: {$set: {cellRank}}});
 }
 
 function substitutionCellEditMovedReducer (state, {payload: {cellMove}}) {
@@ -40,7 +41,7 @@ function substitutionCellEditMovedReducer (state, {payload: {cellMove}}) {
   if (cellRank === undefined) return state;
   let cell;
   do {
-    cellRank = wrapAround(cellRank + cellMove, alphabet.length);
+    cellRank = wrapAround(cellRank + cellMove, frequencyCount);
     cell = cells[selectedAlphabet[cellRank].symbol];
     /* If we looped back to the starting point, the move is impossible. */
     if (cellStop == cellRank) return state;
@@ -49,7 +50,9 @@ function substitutionCellEditMovedReducer (state, {payload: {cellMove}}) {
 }
 
 function substitutionCellEditCancelledReducer (state, _action) {
-  return update(state, {editing: {$set: {}}});
+  const {substitutions: {selectedAlphabet}, editing: {cellRank}} = state;
+  const {symbol} = selectedAlphabet[cellRank];
+  return update(state, {highlightSymbol: {$apply: (sym) => sym === symbol ? -1 : sym}, editing: {$set: {}}});
 }
 
 function substitutionCellCharChangedReducer (state, {payload: {rank, symbol}}) {
@@ -94,7 +97,7 @@ function SubstitutionSelector (state) {
     frequencyAnalysis,
     substitutions, editing,
     symbols: {sym1Small: singleSymbol},
-    editingDecipher,
+    highlightSymbol,
   } = state;
   const {cells, selectedAlphabet} = substitutions;
   const {frequencyCount} = frequencyAnalysis;
@@ -102,23 +105,23 @@ function SubstitutionSelector (state) {
     substitutionCellEditStarted, substitutionCellEditCancelled, substitutionCellEditMoved,
     substitutionCellLockChanged, substitutionCellCharChanged,
     decipheredCellEditCancelled,
-    editingDecipher, cells, nbCells: frequencyCount, selectedAlphabet, singleSymbol, editingRank: editing.cellRank
+    highlightSymbol, cells, nbCells: frequencyCount, selectedAlphabet, singleSymbol, editingRank: editing.cellRank
   };
 }
 
 class SubstitutionView extends React.PureComponent {
   render () {
-    const {cells, editingDecipher, editingRank, nbCells, selectedAlphabet, singleSymbol} = this.props;
+    const {cells, highlightSymbol, editingRank, nbCells, selectedAlphabet, singleSymbol} = this.props;
     return (
       <div style={{width: "100%"}}>
-        <div className='clearfix' style={{marginLeft: "130px"}}>
+        <div ref={this.setWrapperRef} className='clearfix' style={{marginLeft: "130px", display: 'inline-block'}}>
           {range(0, nbCells).map(index => {
             const rank = selectedAlphabet[index].symbol;
             const {rotating, editable, locked, conflict, hint} = cells[rank];
             const isActive = false;
             const isEditing = editingRank === index && !locked && !hint;
             const isLast = nbCells === index + 1;
-            const highlighted = editingDecipher.symbol && editingDecipher.symbol === rotating;
+            const highlighted = highlightSymbol === rotating;
             // const shiftedIndex = (rank) % nbCells;
             // const {rotating} = cells[selectedAlphabet[shiftedIndex].symbol];
 

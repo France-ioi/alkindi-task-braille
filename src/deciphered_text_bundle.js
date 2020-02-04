@@ -132,12 +132,13 @@ function applyRefreshedData (state) {
 }
 
 function decipheredCellEditStartedReducer (state, {payload: {cellRank, symbol}}) {
-  return update(state, {editingDecipher: {$set: {cellRank, symbol}}});
+  return update(state, {highlightSymbol: {$set: symbol}, editingDecipher: {$set: {cellRank, symbol}}});
 }
 
 
 function decipheredCellEditCancelledReducer (state, _action) {
-  return update(state, {editingDecipher: {$set: {}}});
+  const {editingDecipher:  {symbol}} = state;
+  return update(state, {highlightSymbol: {$apply: (sym) => sym === symbol ? -1 : sym}, editingDecipher: {$set: {}}});
 }
 
 function decipheredCellCharChangedReducer (state, {payload: {position, symbol}}) {
@@ -162,25 +163,25 @@ function decipheredCellCharChangedReducer (state, {payload: {position, symbol}})
 
 
 function DecipheredTextViewSelector (state) {
-  const {actions, decipheredText, symbols: {sym1Small: singleSymbol}, editingDecipher} = state;
+  const {actions, decipheredText, symbols: {sym1Small: singleSymbol}, editingDecipher, highlightSymbol} = state;
   const {decipheredCellEditStarted, decipheredCellEditCancelled, decipheredCellCharChanged, decipheredTextResized, decipheredTextScrolled, schedulingJump} = actions;
   const {width, height, cellWidth, cellHeight, bottom, pageRows, pageColumns, visible, scrollTop} = decipheredText;
   return {
     decipheredCellEditStarted, decipheredCellEditCancelled, decipheredCellCharChanged,
     decipheredTextResized, decipheredTextScrolled, schedulingJump,
-    editingDecipher, singleSymbol, width, height, visibleRows: visible.rows, cellWidth, cellHeight, bottom, pageRows, pageColumns, scrollTop
+    editingDecipher, highlightSymbol, singleSymbol, width, height, visibleRows: visible.rows, cellWidth, cellHeight, bottom, pageRows, pageColumns, scrollTop
   };
 }
 
 class DecipheredTextView extends React.PureComponent {
   render () {
-    const {editingDecipher, singleSymbol, width, height, visibleRows, cellWidth, cellHeight, bottom} = this.props;
+    const {editingDecipher, highlightSymbol, singleSymbol, width, height, visibleRows, cellWidth, cellHeight, bottom} = this.props;
     return (
       <div ref={this.refTextBox} onScroll={this.onScroll} style={{position: 'relative', width: width && `${width}px`, height: height && `${height}px`, overflowY: 'scroll'}}>
         {(visibleRows || []).map(({index, columns}) =>
           <div key={index} style={{position: 'absolute', top: `${index * cellHeight}px`}}>
             {columns.filter(c => c !== null).map(({index, position, ciphered, charAt, clear, isHint, locked, colorClass, borderClass}) =>
-              <TextCell key={index} editingDecipher={editingDecipher} singleSymbol={singleSymbol}
+              <TextCell key={index} editingDecipher={editingDecipher} highlightSymbol={highlightSymbol} singleSymbol={singleSymbol}
                 colorClass={colorClass} borderClass={borderClass}
                 column={index} position={position} ciphered={ciphered}
                 clear={clear} charAt={charAt} isHint={isHint} locked={locked}
@@ -222,7 +223,7 @@ class DecipheredTextView extends React.PureComponent {
 
 class TextCell extends React.PureComponent {
   render () {
-    let {editingDecipher, position, singleSymbol, column,
+    let {editingDecipher, highlightSymbol, position, singleSymbol, column,
       charAt, ciphered, clear, isHint, locked,
       cellWidth, cellHeight} = this.props;
     const isEmptyCell = ciphered === undefined;
@@ -285,6 +286,10 @@ class TextCell extends React.PureComponent {
     if (column === 0) {
       editableCellStyle.borderLeft = '1px solid #eee';
       symbolCellStyle.borderLeft = '1px solid #9e9e9e';
+    }
+
+    if (highlightSymbol === ciphered) {
+      symbolCellStyle.backgroundColor = "#9c9c9c";
     }
 
     return (

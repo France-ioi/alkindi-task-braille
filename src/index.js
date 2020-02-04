@@ -73,7 +73,7 @@ function appInitReducer (state, _action) {
 }
 
 function taskInitReducer (state, _action) {
-  return state;
+  return {...state, highlightSymbol: -1};
 }
 
 function taskRefreshReducer (state, _action) {

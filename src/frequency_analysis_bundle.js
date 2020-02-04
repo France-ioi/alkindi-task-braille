@@ -128,10 +128,10 @@ function normalizeAndSortFrequencies (entries) {
 }
 
 function FrequencyAnalysisSelector (state) {
-  const {taskData: {version:{version}}, editingDecipher, frequencyAnalysis: {textFrequencies, visibleLetters, totalChars, frequencyCount}, symbols: {sym1Small: singleSymbol}} = state;
+  const {taskData: {version:{version}}, highlightSymbol, frequencyAnalysis: {textFrequencies, visibleLetters, totalChars, frequencyCount}, symbols: {sym1Small: singleSymbol}} = state;
   const scale = 30 / referenceFrequencies.reduce((a, x) => Math.max(a, x.proba), 0);
   return {
-    editingDecipher,
+    highlightSymbol,
     singleSymbol,
     referenceFrequencies,
     visibleLetters,
@@ -149,7 +149,7 @@ const numberStyle = {
 
 class FrequencyAnalysisView extends React.PureComponent {
   render () {
-    const {version, editingDecipher, singleSymbol, visibleLetters, totalChars, frequencyCount, referenceFrequencies, textFrequencies, scale} = this.props;
+    const {version, highlightSymbol, singleSymbol, visibleLetters, totalChars, frequencyCount, referenceFrequencies, textFrequencies, scale} = this.props;
     if (!referenceFrequencies) return false;
 
     return (
@@ -171,7 +171,7 @@ class FrequencyAnalysisView extends React.PureComponent {
         </div>
         {range(0, frequencyCount).map(index =>
           <div key={index} style={{marginRight: '4px', float: 'left', width: '20px', height: '108px', position: 'relative'}}>
-            <TextFrequencyBox index={index} editingDecipher={editingDecipher} singleSymbol={singleSymbol} cell={textFrequencies[index]} scale={scale} />
+            <TextFrequencyBox index={index} highlightSymbol={highlightSymbol} singleSymbol={singleSymbol} cell={textFrequencies[index]} scale={scale} />
             <ReferenceFrequencyBox index={index} visibleLetters={visibleLetters} cell={referenceFrequencies[index]} scale={scale} />
           </div>)}
       </div>
@@ -181,10 +181,10 @@ class FrequencyAnalysisView extends React.PureComponent {
 
 class TextFrequencyBox extends React.PureComponent {
   render () {
-    const {cell, scale, singleSymbol, editingDecipher} = this.props;
+    const {cell, scale, singleSymbol, highlightSymbol} = this.props;
     if (!cell) return false;
 
-    const highlighted = editingDecipher.symbol && editingDecipher.symbol === cell.symbol;
+    const highlighted =  highlightSymbol === cell.symbol;
 
     const svgStyle = {};
 
