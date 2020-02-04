@@ -6,6 +6,7 @@ import {elements, updateGridGeometry, updateGridVisibleRows, applyPermutation} f
 import HTML5Backend from "react-dnd-html5-backend";
 import {DndProvider, DragSource, DropTarget} from "react-dnd";
 import {symSpecV1} from './symbols_bundle';
+import Collapsable from './tools/collapsable';
 const {RADIUS, BETWEEN_DOTS, BETWEEN_SYM_VT, BETWEEN_SYM_HZ} = symSpecV1();
 
 
@@ -354,67 +355,68 @@ class PermutationView extends React.PureComponent {
           permCells={permCells}
           onLock={this.onPermLock}
           onDrop={this.onPermSwapPairs} />
-        <h3>Result of permutation</h3>
-        <div
-          ref={this.refTextBox}
-          onScroll={this.onScroll}
-          style={{
-            position: 'relative',
-            width: width && `${width}px`,
-            height: height && `${height}px`,
-            overflowX: 'scroll',
-            border: '1px solid #000',
+        <Collapsable title={<h3>{"Result of permutation"}</h3>}>
+          <div
+            ref={this.refTextBox}
+            onScroll={this.onScroll}
+            style={{
+              position: 'relative',
+              width: width && `${width}px`,
+              height: height && `${height}px`,
+              overflowX: 'scroll',
+              border: '1px solid #000',
 
-          }} >
-          <ColumnsSeparators
-            pageColumns={pageColumns}
-            cellWidth={cellWidth}
-            bottom={bottom}
-          />
-          {(visibleRows || [])
-            .map(({index, columns}) =>
-              (<div
-                key={index}
-                style={{
-                  position: 'absolute',
-                  top: `${index * cellHeight}px`,
-                  padding: '4px'
-                }}>
-                {columns.map(({index, cell}) =>
-                  cell ? (<svg
-                    key={index}
-                    className={`_${cell[0]}a _${cell[1]}b _${cell[2]}c`}
-                    width={cellWidth}
-                    height={cellHeight}
-                    style={{
+            }} >
+            <ColumnsSeparators
+              pageColumns={pageColumns}
+              cellWidth={cellWidth}
+              bottom={bottom}
+            />
+            {(visibleRows || [])
+              .map(({index, columns}) =>
+                (<div
+                  key={index}
+                  style={{
+                    position: 'absolute',
+                    top: `${index * cellHeight}px`,
+                    padding: '4px'
+                  }}>
+                  {columns.map(({index, cell}) =>
+                    cell ? (<svg
+                      key={index}
+                      className={`_${cell[0]}a _${cell[1]}b _${cell[2]}c`}
+                      width={cellWidth}
+                      height={cellHeight}
+                      style={{
+                        position: 'absolute',
+                        left: `${index * cellWidth + 1}px`,
+                        width: `${cellWidth}px`,
+                        height: `${cellHeight}px`
+                      }} >
+                      {cells}
+                    </svg>) : (<div key={index} style={{
                       position: 'absolute',
                       left: `${index * cellWidth + 1}px`,
                       width: `${cellWidth}px`,
                       height: `${cellHeight}px`
-                    }} >
-                    {cells}
-                  </svg>) : (<div key={index} style={{
-                    position: 'absolute',
-                    left: `${index * cellWidth + 1}px`,
-                    width: `${cellWidth}px`,
-                    height: `${cellHeight}px`
-                  }}></div>)
-                )}
-              </div>)
-            )}
-          <SymColLocksHighlighter
-            permCells={permCells}
-            pageColumns={pageColumns}
-            cellWidth={cellWidth}
-            bottom={bottom}
-          />
-          <div style={{
-            position: 'absolute',
-            top: `${bottom}px`,
-            width: '1px',
-            height: '1px'
-          }} />
-        </div>
+                    }}></div>)
+                  )}
+                </div>)
+              )}
+            <SymColLocksHighlighter
+              permCells={permCells}
+              pageColumns={pageColumns}
+              cellWidth={cellWidth}
+              bottom={bottom}
+            />
+            <div style={{
+              position: 'absolute',
+              top: `${bottom}px`,
+              width: '1px',
+              height: '1px'
+            }} />
+          </div>
+        </Collapsable>
       </div >
     );
   }

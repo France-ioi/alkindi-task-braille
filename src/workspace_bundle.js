@@ -1,6 +1,7 @@
 
 import React from 'react';
 import {connect} from 'react-redux';
+import Collapsable from './tools/collapsable';
 
 function WorkspaceSelector (state) {
   const {
@@ -21,43 +22,51 @@ class Workspace extends React.PureComponent {
     } = this.props;
     return (
       <div>
-        <h2>{"Encrypted message"}</h2>
-        <CipheredText />
+        <Collapsable title={<h2>{"Encrypted message"}</h2>}>
+          <CipheredText />
+        </Collapsable>
         <br />
         {addPerm && (<>
-          <h2>{"Permutation:"}</h2>
-          <PermutatedText />
+          <Collapsable title={<h2>{"Permutation"}</h2>}>
+            <PermutatedText />
+          </Collapsable>
           <br />
         </>)
         }
         {addXor && (<>
-          <h2>{"XOR Mask:"}</h2>
-          <XORText />
+          <Collapsable title={<h2>{"XOR Mask"}</h2>}>
+            <XORText />
+          </Collapsable>
           <br />
         </>)
         }
         {addAnd && (<>
-          <h2>{"AND Mask:"}</h2>
-          <ANDText />
+          <Collapsable title={<h2>{"AND Mask"}</h2>}>
+            <ANDText />
+          </Collapsable>
           <br />
         </>)
         }
-        <h2>{"Frequency Analysis"}</h2>
-        <FrequencyAnalysis />
+        <Collapsable title={<h2>{"Frequency Analysis"}</h2>}>
+          <FrequencyAnalysis />
+        </Collapsable>
         <br />
-        <h2>Substitution:</h2>
-        <div className="clearfix">
-          <div>
-            <Substitution />
+        <Collapsable title={<h2>{"Substitution"}</h2>}>
+          <div className="clearfix">
+            <div>
+              <Substitution />
+            </div>
           </div>
-        </div>
+        </Collapsable>
         <br />
-        <h2>Hints:</h2>
-        <Hints />
+        <Collapsable title={<h2>{"Hints"}</h2>}>
+          <Hints />
+        </Collapsable>
         <HintRequestFeedback />
         <br />
-        <h2>{"Decrypted text"}</h2>
-        <DecipheredText />
+        <Collapsable title={<h2>{"Decrypted text"}</h2>}>
+          <DecipheredText />
+        </Collapsable>
       </div>
     );
   }
