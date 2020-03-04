@@ -267,10 +267,10 @@ function getFreeHints (clearText) {
   return hints;
 }
 
-function getRandomInt (min, max) {
+function getRandomInt (rng, min, max) {
   min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+  max = Math.floor(max - 1);
+  return Math.floor(rng() * (max - min + 1)) + min;
 }
 
 // module.exports.generateTaskData =
@@ -284,16 +284,17 @@ function generateTaskData (task) {
   const clearText = generate(rng0, minLength, minLength + 50, false);
 
   let substitution = symbolAlphabet;
-
   let masks = XOR_MASK;
+
   if (version > 10) {
+    const rng = seedrandom(task.random_seed + 6);
     masks = [];
     for (let i=0; i<3; i++) {
-      masks.push(getRandomInt(0, 4096));
+      masks.push(getRandomInt(rng, 0, 4096));
     }
     substitution = [];
     for (let i=0; i<alphabet.length; i++) {
-      substitution.push(getRandomInt(1, 4096));
+      substitution.push(getRandomInt(rng, 1, 4096));
     }
   }
 
