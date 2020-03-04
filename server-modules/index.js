@@ -273,6 +273,18 @@ function getRandomInt (rng, min, max) {
   return Math.floor(rng() * (max - min + 1)) + min;
 }
 
+function getRandomIntArray (rng, length, min, max) {
+  const data = [];
+  for (let i = 0; i < length; i++) {
+    let value = getRandomInt(rng, min, max);
+    while (data.includes(value)) {
+      value = getRandomInt(rng, min, max);
+    }
+    data.push(value);
+  }
+  return data;
+}
+
 // module.exports.generateTaskData =
 function generateTaskData (task) {
   const version = task.params.version || 1;
@@ -288,14 +300,8 @@ function generateTaskData (task) {
 
   if (version > 10) {
     const rng = seedrandom(task.random_seed + 6);
-    masks = [];
-    for (let i=0; i<3; i++) {
-      masks.push(getRandomInt(rng, 0, 4096));
-    }
-    substitution = [];
-    for (let i=0; i<alphabet.length; i++) {
-      substitution.push(getRandomInt(rng, 1, 4096));
-    }
+    masks = getRandomIntArray(rng, 3, 0, 4096);
+    substitution = getRandomIntArray(rng, alphabet.length, 1, 4096);
   }
 
   const clearSymbols = textTo3Symbols(alphabet, substitution, clearText);
