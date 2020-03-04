@@ -299,9 +299,8 @@ function generateTaskData (task) {
   let masks = XOR_MASK;
 
   if (version > 10) {
-    const rng = seedrandom(task.random_seed + 6);
-    masks = getRandomIntArray(rng, 3, 0, 4096);
-    substitution = getRandomIntArray(rng, alphabet.length, 1, 4096);
+    masks = getRandomIntArray(rng0, 3, 0, 4096);
+    substitution = getRandomIntArray(rng0, alphabet.length, 1, 4096);
   }
 
   const clearSymbols = textTo3Symbols(alphabet, substitution, clearText);
