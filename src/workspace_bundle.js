@@ -27,8 +27,8 @@ class Workspace extends React.PureComponent {
           parseFloat(version) < 10 && (
             <>
               <br />
-              <Alert bsStyle="warning">
-                The task has changed, if you haven't already spent time on this attempt, you should create a new attempt
+              <Alert bsStyle="danger">
+              Cette tentative utilise une ancienne version du sujet, qui contenait une faille non prévue. Si vous n'êtes pas en plein milieu d'une longue résolution de cette tentative, merci de travailler sur une nouvelle tentative pour utiliser la dernier version du sujet (qui sera celle utilisée au 3e tour).
               </Alert>
               <br />
             </>
