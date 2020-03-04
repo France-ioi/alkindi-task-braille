@@ -157,7 +157,7 @@ module.exports.gradeAnswer = function (args, task_data, callback) {
  * task methods
  */
 
-function textTo3Symbols (alphabet, clearText) {
+function textTo3Symbols (alphabet, symbolAlphabet, clearText) {
   const data = [];
   for (let i = 0; i + 3 < clearText.length; i = i + 3) {
     const item = [
@@ -171,10 +171,10 @@ function textTo3Symbols (alphabet, clearText) {
 }
 
 
-function applyXORMask (clearSymbols) {
+function applyXORMask (masks, clearSymbols) {
   return clearSymbols.map(arr =>
     arr.map((sym, i) => {
-      return XOR_MASK[i] ^ sym;
+      return masks[i] ^ sym;
     }));
 }
 
@@ -230,11 +230,11 @@ function applyPermutation (data, permutation) {
       for (let k = 0; k < action.length; k++) {
         const [, col, mask, shift] = action[k];
         if (shift === 0) {
-          value +=  (item[col] & mask);
+          value += (item[col] & mask);
         } else if (shift > 0) { // >>
-          value +=  (item[col] & mask) >> Math.abs(shift);
+          value += (item[col] & mask) >> Math.abs(shift);
         } else { // <<
-          value +=  (item[col] & mask) << Math.abs(shift);
+          value += (item[col] & mask) << Math.abs(shift);
         }
       }
 
@@ -249,7 +249,12 @@ const versions = {
   "1": {version: 1, freeHints: false, addPerm: false, addXor: false, addAnd: false},
   "1.5": {version: 1.5, freeHints: true, addPerm: true, addXor: false, addAnd: true},
   "2": {version: 2, freeHints: false, addPerm: true, addXor: false, addAnd: true},
-  "3": {version: 3, freeHints: false, addPerm: true, addXor: true, addAnd: true}
+  "3": {version: 3, freeHints: false, addPerm: true, addXor: true, addAnd: true},
+  "10.5": {version: 10.5, freeHints: true, addPerm: false, addXor: false, addAnd: false},
+  "11": {version: 11, freeHints: false, addPerm: false, addXor: false, addAnd: false},
+  "11.5": {version: 11.5, freeHints: true, addPerm: true, addXor: false, addAnd: true},
+  "12": {version: 12, freeHints: false, addPerm: true, addXor: false, addAnd: true},
+  "13": {version: 13, freeHints: false, addPerm: true, addXor: true, addAnd: true}
 };
 
 const nbFreeHints = 50;
@@ -257,9 +262,15 @@ const nbFreeHints = 50;
 function getFreeHints (clearText) {
   const hints = [];
   for (let i = 0; i < nbFreeHints; i++) {
-    hints.push({cellRank: i, symbol:clearText[i], type: 'type_3'});
+    hints.push({cellRank: i, symbol: clearText[i], type: 'type_3'});
   }
   return hints;
+}
+
+function getRandomInt (min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 // module.exports.generateTaskData =
@@ -272,9 +283,23 @@ function generateTaskData (task) {
   const minLength = 2000;
   const clearText = generate(rng0, minLength, minLength + 50, false);
 
-  const clearSymbols = textTo3Symbols(alphabet, clearText);
+  let substitution = symbolAlphabet;
 
-  const xorSymbols = addXor ? applyXORMask(clearSymbols) : clearSymbols;
+  let masks = XOR_MASK;
+  if (version > 10) {
+    masks = [];
+    for (let i=0; i<3; i++) {
+      masks.push(getRandomInt(0, 4096));
+    }
+    substitution = [];
+    for (let i=0; i<alphabet.length; i++) {
+      substitution.push(getRandomInt(1, 4096));
+    }
+  }
+
+  const clearSymbols = textTo3Symbols(alphabet, substitution, clearText);
+
+  const xorSymbols = addXor ? applyXORMask(masks, clearSymbols) : clearSymbols;
 
   const perm_input = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 

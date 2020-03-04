@@ -1,6 +1,7 @@
 
 import React from 'react';
 import {connect} from 'react-redux';
+import {Alert} from 'react-bootstrap';
 import Collapsable from './tools/collapsable';
 
 function WorkspaceSelector (state) {
@@ -17,11 +18,22 @@ function WorkspaceSelector (state) {
 class Workspace extends React.PureComponent {
   render () {
     const {
-      version: {addPerm, addXor, addAnd},
+      version: {addPerm, addXor, addAnd, version},
       CipheredText, PermutatedText, XORText, ANDText, FrequencyAnalysis, Substitution, DecipheredText, HintRequestFeedback, Hints,
     } = this.props;
     return (
       <div>
+        {
+          parseFloat(version) < 10 && (
+            <>
+              <br />
+              <Alert bsStyle="warning">
+                The task has changed, if you haven't already spent time on this attempt, you should create a new attempt
+              </Alert>
+              <br />
+            </>
+          )
+        }
         <Collapsable title={<h2>{"Message chiffré"}</h2>}>
           <CipheredText />
         </Collapsable>
