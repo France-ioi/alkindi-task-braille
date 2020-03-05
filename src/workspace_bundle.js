@@ -28,7 +28,7 @@ class Workspace extends React.PureComponent {
             <>
               <br />
               <Alert bsStyle="danger">
-              Cette tentative utilise une ancienne version du sujet, qui contenait une faille non prévue. Si vous n'êtes pas en plein milieu d'une longue résolution de cette tentative, merci de travailler sur une nouvelle tentative pour utiliser la dernier version du sujet (qui sera celle utilisée au 3e tour).
+              Cette tentative utilise une ancienne version du sujet, qui contenait une faille non prévue. Si vous n'êtes pas en plein milieu d'une longue résolution de cette tentative, merci de travailler sur une nouvelle tentative pour utiliser la dernière version du sujet (qui sera celle utilisée au 3e tour).
               </Alert>
               <br />
             </>
